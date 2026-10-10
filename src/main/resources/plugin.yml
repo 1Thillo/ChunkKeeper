@@ -1,0 +1,13 @@
+name: ChunkKeeper
+version: '${version}'
+main: de.thillo.chunkkeeper.ChunkKeeper
+api-version: '26.2'
+folia-supported: true
+description: Keep selected chunks loaded, even when no players are around.
+author: Thillo
+website: https://github.com/1Thillo/ChunkKeeper
+
+permissions:
+  chunkkeeper.use:
+    description: Use the /chunkkeeper command.
+    default: op
