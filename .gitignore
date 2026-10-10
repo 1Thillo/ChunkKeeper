@@ -1,0 +1,14 @@
+# Gradle
+.gradle/
+build/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+bin/
+
+# run-paper test server
+run/
+
+*.log
