@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.thillo.chunkkeeper"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -60,4 +60,18 @@ tasks {
     runServer {
         minecraftVersion("26.2")
     }
+}
+
+// Development server for hotswap: ./gradlew runServer, then attach a debugger to localhost:5005.
+// The JetBrains Runtime with enhanced class redefinition also applies changes to fields, methods
+// and class structure, not only to method bodies.
+tasks.withType<xyz.jpenilla.runtask.task.AbstractRun>().configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        vendor = JvmVendorSpec.JETBRAINS
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+    jvmArgs(
+        "-XX:+AllowEnhancedClassRedefinition",
+        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:5005",
+    )
 }

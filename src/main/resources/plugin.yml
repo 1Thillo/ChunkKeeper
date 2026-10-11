@@ -8,6 +8,12 @@ author: Thillo
 website: https://github.com/1Thillo/ChunkKeeper
 softdepend: [WorldEdit, FastAsyncWorldEdit, WorldGuard]
 
+commands:
+  chunkkeeper:
+    description: Keep chunks loaded.
+    usage: /chunkkeeper help
+    aliases: [keepchunks, kc, ck, chk]
+
 permissions:
   chunkkeeper.*:
     description: All ChunkKeeper commands.

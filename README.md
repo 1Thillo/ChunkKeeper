@@ -23,14 +23,14 @@ familiar command names and takes over KeepChunks' chunks automatically on its fi
    `releaseallprotection` setting, and keeps all those chunks loaded. The console shows how many
    chunks were imported. KeepChunks' files are only read, never changed.
 
-`/keepchunks` keeps working as an alias, the subcommands are the same, and the old
+`/keepchunks` and `/kc` keep working, the subcommands are the same, and the old
 `keepchunks.<subcommand>` permissions are still accepted (see `legacy-permissions`). If KeepChunks
 was used again after the switch, `/chunkkeeper import` picks up the chunks it added.
 
 ## Commands
 
-The main command is `/chunkkeeper`, with the aliases `/keepchunks` and `/chk`.
-(`/ck` and `/kc` are taken by EssentialsX.)
+The main command is `/chunkkeeper`, with the aliases `/keepchunks`, `/kc`, `/ck` and `/chk`.
+EssentialsX also uses `/kc` and `/ck` (for `/createkit`), but leaves them to ChunkKeeper.
 
 Coordinates are **chunk coordinates** (block coordinate divided by 16), except for the rail commands,
 which take the block position of a rail. `/chunkkeeper chunkinfo current` shows the chunk you stand in.
@@ -89,8 +89,37 @@ the thread of the region that owns them, so ChunkKeeper is safe to use there.
 ./gradlew build
 ```
 
-The plugin jar is `build/libs/ChunkKeeper-<version>.jar`. Every pushed branch is also built by
-GitHub Actions; the jar is attached to the workflow run as `plugin-jar`.
+The plugin jar is `build/libs/ChunkKeeper-<version>.jar`. The build also runs the unit tests.
+Every pushed branch is built by GitHub Actions; the jar is attached to the workflow run as
+`plugin-jar`.
+
+## Reloading with PlugMan
+
+ChunkKeeper can be reloaded at runtime with PlugManX (`/plugman reload ChunkKeeper`), also on
+Folia. To update without a restart, unload it, replace the jar and load the new one:
+
+```
+/plugman unload ChunkKeeper
+(replace ChunkKeeper-<old>.jar with ChunkKeeper-<new>.jar)
+/plugman load ChunkKeeper-<new>
+```
+
+Kept chunks stay loaded the whole time. On Windows the jar of a loaded plugin cannot be deleted,
+so unload first.
+
+## Development with hotswap
+
+```bash
+./gradlew runServer
+```
+
+starts a Paper 26.2 development server in `run/` with the plugin, running on the JetBrains Runtime
+(downloaded by Gradle on the first run) with a debugger port on `localhost:5005`. On the first run,
+accept the EULA in `run/eula.txt` and start again.
+
+In VS Code, start the debug configuration **Attach to dev server (hotswap)**. Saved changes are
+then applied to the running server ("hot code replace"), including new methods and fields. Changes
+to `plugin.yml`, new commands or listeners and code in `onEnable` still need a restart of the task.
 
 ## License
 
