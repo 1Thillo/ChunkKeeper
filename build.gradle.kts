@@ -29,7 +29,7 @@ dependencies {
     }
 
     testImplementation("io.papermc.paper:paper-api:26.2.build.128-stable")
-    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
