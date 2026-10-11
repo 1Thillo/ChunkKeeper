@@ -37,6 +37,7 @@ public final class ChunkKeeperCommand implements BasicCommand {
         add(new ListCommand(plugin));
         add(new ChunkInfoCommand(plugin));
         add(new ReloadCommand(plugin));
+        add(new ImportCommand(plugin));
         add(new VersionCommand(plugin));
     }
 
