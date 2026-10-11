@@ -35,6 +35,8 @@ public final class ChunkKeeperCommand implements BasicCommand {
         add(new ChunkCommand(plugin, false));
         add(new RegionCommand(plugin, true));
         add(new RegionCommand(plugin, false));
+        add(new RailCommand(plugin, true));
+        add(new RailCommand(plugin, false));
         add(new ReleaseAllCommand(plugin));
         add(new ListCommand(plugin));
         add(new ChunkInfoCommand(plugin));

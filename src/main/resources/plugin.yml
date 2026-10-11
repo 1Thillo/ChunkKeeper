@@ -23,6 +23,8 @@ permissions:
       chunkkeeper.releasechunk: true
       chunkkeeper.keepregion: true
       chunkkeeper.releaseregion: true
+      chunkkeeper.keeprail: true
+      chunkkeeper.releaserail: true
       chunkkeeper.releaseall: true
   chunkkeeper.help:
     default: op
@@ -43,6 +45,10 @@ permissions:
   chunkkeeper.keepregion:
     default: op
   chunkkeeper.releaseregion:
+    default: op
+  chunkkeeper.keeprail:
+    default: op
+  chunkkeeper.releaserail:
     default: op
   chunkkeeper.releaseall:
     default: op
