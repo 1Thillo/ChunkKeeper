@@ -5,7 +5,8 @@ build/
 # IDEs
 .idea/
 *.iml
-.vscode/
+.vscode/*
+!.vscode/launch.json
 bin/
 
 # run-paper test server
