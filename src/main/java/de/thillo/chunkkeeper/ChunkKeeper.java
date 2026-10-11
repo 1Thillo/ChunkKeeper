@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.thillo.chunkkeeper.command.ChunkKeeperCommand;
+import de.thillo.chunkkeeper.hook.Hooks;
 import de.thillo.chunkkeeper.importer.KeepChunksImporter;
 
 public final class ChunkKeeper extends JavaPlugin {
@@ -21,6 +22,7 @@ public final class ChunkKeeper extends JavaPlugin {
     private Permissions permissions;
     private Keeper keeper;
     private KeepChunksImporter importer;
+    private Hooks hooks;
 
     @Override
     public void onEnable() {
@@ -30,6 +32,7 @@ public final class ChunkKeeper extends JavaPlugin {
         keeper = new Keeper(store, loader);
         permissions = new Permissions(this);
         importer = new KeepChunksImporter(getDataFolder().getParentFile());
+        hooks = new Hooks();
 
         // No chunks.yml yet means this is the first start: take over what KeepChunks had.
         Optional<KeepChunksImporter.Result> imported = store.fileExists() ? Optional.empty() : importer.read();
@@ -122,5 +125,9 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public KeepChunksImporter importer() {
         return importer;
+    }
+
+    public Hooks hooks() {
+        return hooks;
     }
 }

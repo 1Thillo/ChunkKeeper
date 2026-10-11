@@ -12,3 +12,7 @@ legacy-permissions: true
 
 # "/chunkkeeper keeprail" stops after following this many rail blocks.
 rail-search-limit: 50000
+
+# keepregion and releaseregion refuse areas with more chunks than this, so a typo in the
+# coordinates cannot force-load millions of chunks. Every kept chunk costs memory and tick time.
+max-area-chunks: 10000
