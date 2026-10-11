@@ -1,5 +1,6 @@
 package de.thillo.chunkkeeper.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
+import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
@@ -27,16 +29,43 @@ final class ChunkInfoCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return Arguments.CHUNK_USAGE;
+        return "(current | coords <x> <z> <world> | coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world>)";
     }
 
     @Override
     public String description() {
-        return "Show whether a chunk is kept loaded.";
+        return "Show whether a chunk or an area is kept loaded.";
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (isArea(args)) {
+            areaInfo(sender, args);
+        } else {
+            chunkInfo(sender, args);
+        }
+    }
+
+    private static boolean isArea(String[] args) {
+        if (args.length == 0) {
+            return false;
+        }
+        String mode = args[0].toLowerCase();
+        return mode.equals("worldedit") || mode.equals("worldguard") || (mode.equals("coords") && args.length == 6);
+    }
+
+    private void areaInfo(CommandSender sender, String[] args) {
+        Optional<Area> area = Arguments.area(plugin, sender, args, name());
+        if (area.isEmpty()) {
+            return;
+        }
+        long kept = area.get().chunks().stream().filter(plugin.store()::contains).count();
+        sender.sendMessage(Messages.info("Area: " + area.get().description()));
+        sender.sendMessage(Messages.field("Chunks in the area", String.valueOf(area.get().chunks().size())));
+        sender.sendMessage(Messages.field("Kept by ChunkKeeper", String.valueOf(kept)));
+    }
+
+    private void chunkInfo(CommandSender sender, String[] args) {
         Optional<KeptChunk> target = Arguments.chunk(sender, args, name());
         if (target.isEmpty()) {
             return;
@@ -64,11 +93,16 @@ final class ChunkInfoCommand implements Subcommand {
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
         if (args.length == 1) {
-            return List.of("current", "coords");
+            List<String> modes = new ArrayList<>(List.of("current"));
+            modes.addAll(Arguments.areaSuggestions(plugin, sender, args));
+            return modes;
         }
-        if (args[0].equalsIgnoreCase("coords")) {
-            return Arguments.coordSuggestions(sender, "xzw", args.length - 1);
+        // The third value after "coords" is either the world (one chunk) or x2 (an area), so offer both.
+        if (args[0].equalsIgnoreCase("coords") && args.length == 4) {
+            List<String> options = new ArrayList<>(Arguments.worldNames());
+            options.addAll(Arguments.coordSuggestions(sender, "xzxzw", 3));
+            return options;
         }
-        return List.of();
+        return Arguments.areaSuggestions(plugin, sender, args);
     }
 }
