@@ -1,0 +1,14 @@
+# ChunkKeeper configuration. Apply changes with /chunkkeeper reload.
+
+# Only the server console may run "/chunkkeeper releaseall", so nobody wipes the list by accident.
+release-all-console-only: true
+
+# Refuse to unload a world while it still has kept chunks (for example through Multiverse).
+prevent-world-unload: true
+
+# Also accept the permissions of the old KeepChunks plugin (keepchunks.keepchunk and so on),
+# so existing LuckPerms groups keep working after switching.
+legacy-permissions: true
+
+# "/chunkkeeper keeprail" stops after following this many rail blocks.
+rail-search-limit: 50000
