@@ -8,6 +8,19 @@ author: Thillo
 website: https://github.com/1Thillo/ChunkKeeper
 
 permissions:
-  chunkkeeper.use:
-    description: Use the /chunkkeeper command.
+  chunkkeeper.*:
+    description: All ChunkKeeper commands.
+    default: op
+    children:
+      chunkkeeper.help: true
+      chunkkeeper.version: true
+      chunkkeeper.keepchunk: true
+      chunkkeeper.releasechunk: true
+  chunkkeeper.help:
+    default: op
+  chunkkeeper.version:
+    default: op
+  chunkkeeper.keepchunk:
+    default: op
+  chunkkeeper.releasechunk:
     default: op

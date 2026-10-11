@@ -6,11 +6,15 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import de.thillo.chunkkeeper.command.ChunkKeeperCommand;
+
 public final class ChunkKeeper extends JavaPlugin {
 
     private ChunkStore store;
     private ChunkLoader loader;
     private Settings settings;
+    private Permissions permissions;
+    private Keeper keeper;
 
     @Override
     public void onEnable() {
@@ -18,6 +22,8 @@ public final class ChunkKeeper extends JavaPlugin {
         settings = Settings.from(getConfig());
         store = new ChunkStore(new File(getDataFolder(), "chunks.yml"), getLogger());
         loader = new ChunkLoader(this);
+        keeper = new Keeper(store, loader);
+        permissions = new Permissions(this);
 
         store.load();
         keepAllLoaded();
@@ -52,5 +58,13 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public Settings settings() {
         return settings;
+    }
+
+    public Permissions permissions() {
+        return permissions;
+    }
+
+    public Keeper keeper() {
+        return keeper;
     }
 }
