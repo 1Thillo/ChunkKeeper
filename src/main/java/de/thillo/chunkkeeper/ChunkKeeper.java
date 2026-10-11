@@ -3,12 +3,14 @@ package de.thillo.chunkkeeper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.thillo.chunkkeeper.command.ChunkKeeperCommand;
+import de.thillo.chunkkeeper.importer.KeepChunksImporter;
 
 public final class ChunkKeeper extends JavaPlugin {
 
@@ -18,21 +20,51 @@ public final class ChunkKeeper extends JavaPlugin {
     private volatile Settings settings;
     private Permissions permissions;
     private Keeper keeper;
+    private KeepChunksImporter importer;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        settings = Settings.from(getConfig());
         store = new ChunkStore(new File(getDataFolder(), "chunks.yml"), getLogger());
         loader = new ChunkLoader(this);
         keeper = new Keeper(store, loader);
         permissions = new Permissions(this);
+        importer = new KeepChunksImporter(getDataFolder().getParentFile());
+
+        // No chunks.yml yet means this is the first start: take over what KeepChunks had.
+        Optional<KeepChunksImporter.Result> imported = store.fileExists() ? Optional.empty() : importer.read();
+        imported.flatMap(KeepChunksImporter.Result::releaseAllProtection).ifPresent(protection -> {
+            getConfig().set("release-all-console-only", protection);
+            saveConfig();
+        });
+        settings = Settings.from(getConfig());
 
         store.load();
         keepAllLoaded();
+        imported.ifPresent(this::finishImport);
+        if (!store.fileExists()) {
+            store.save();
+        }
+        warnIfKeepChunksIsInstalled();
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
         registerCommand("chunkkeeper", "Keep chunks loaded.", List.of("keepchunks", "chk"), new ChunkKeeperCommand(this));
+    }
+
+    private void finishImport(KeepChunksImporter.Result result) {
+        int added = keeper.keep(result.chunks());
+        getLogger().info("First start: imported " + added + " chunks from " + importer.dataFile().getPath() + ".");
+        if (!result.unreadable().isEmpty()) {
+            getLogger().warning("Could not read these KeepChunks entries: " + result.unreadable());
+        }
+    }
+
+    private void warnIfKeepChunksIsInstalled() {
+        if (Bukkit.getPluginManager().getPlugin("KeepChunks") != null) {
+            getLogger().warning("KeepChunks is still installed. ChunkKeeper has taken over its chunks; "
+                    + "please remove KeepChunks so the two plugins do not manage the same chunks. "
+                    + "Use /chunkkeeper import to pick up chunks KeepChunks added in the meantime.");
+        }
     }
 
     /** Force-loads every kept chunk whose world is currently loaded. */
@@ -86,5 +118,9 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public Keeper keeper() {
         return keeper;
+    }
+
+    public KeepChunksImporter importer() {
+        return importer;
     }
 }
