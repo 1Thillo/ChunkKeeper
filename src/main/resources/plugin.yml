@@ -12,7 +12,7 @@ commands:
   chunkkeeper:
     description: Keep chunks loaded.
     usage: /chunkkeeper help
-    aliases: [keepchunks, chk]
+    aliases: [keepchunks, kc, ck, chk]
 
 permissions:
   chunkkeeper.*:

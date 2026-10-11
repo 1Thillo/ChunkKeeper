@@ -118,7 +118,7 @@ public final class ChunkKeeperCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(Messages.info("ChunkKeeper commands (aliases /keepchunks, /chk):"));
+        sender.sendMessage(Messages.info("ChunkKeeper commands (aliases /keepchunks, /kc, /ck, /chk):"));
         for (Subcommand subcommand : subcommands.values()) {
             if (permissions.has(sender, subcommand.name())) {
                 sender.sendMessage(Component.text("/chunkkeeper " + subcommand.name() + " " + subcommand.usage(), NamedTextColor.WHITE)

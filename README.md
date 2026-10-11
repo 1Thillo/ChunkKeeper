@@ -23,14 +23,15 @@ familiar command names and takes over KeepChunks' chunks automatically on its fi
    `releaseallprotection` setting, and keeps all those chunks loaded. The console shows how many
    chunks were imported. KeepChunks' files are only read, never changed.
 
-`/keepchunks` keeps working as an alias, the subcommands are the same, and the old
+`/keepchunks` and `/kc` keep working, the subcommands are the same, and the old
 `keepchunks.<subcommand>` permissions are still accepted (see `legacy-permissions`). If KeepChunks
 was used again after the switch, `/chunkkeeper import` picks up the chunks it added.
 
 ## Commands
 
-The main command is `/chunkkeeper`, with the aliases `/keepchunks` and `/chk`.
-(`/ck` and `/kc` are taken by EssentialsX.)
+The main command is `/chunkkeeper`, with the aliases `/keepchunks`, `/kc`, `/ck` and `/chk`.
+EssentialsX also uses `/kc` and `/ck` (for `/createkit`), but leaves them to ChunkKeeper;
+`/essentials:kc` still reaches Essentials.
 
 Coordinates are **chunk coordinates** (block coordinate divided by 16), except for the rail commands,
 which take the block position of a rail. `/chunkkeeper chunkinfo current` shows the chunk you stand in.
