@@ -19,9 +19,7 @@ final class WorldListener implements Listener {
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {
-        for (KeptChunk chunk : plugin.store().inWorld(event.getWorld().getName())) {
-            plugin.loader().keepLoaded(chunk);
-        }
+        plugin.loader().keepLoaded(plugin.store().inWorld(event.getWorld().getName()));
     }
 
     @EventHandler(ignoreCancelled = true)

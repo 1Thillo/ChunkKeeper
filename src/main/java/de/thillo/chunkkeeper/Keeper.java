@@ -1,6 +1,8 @@
 package de.thillo.chunkkeeper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Adds chunks to or removes them from the list, switches their force-load flag and saves the file.
@@ -18,31 +20,31 @@ public final class Keeper {
 
     /** @return how many of the chunks were not kept before */
     public int keep(Collection<KeptChunk> chunks) {
-        int added = 0;
+        List<KeptChunk> added = new ArrayList<>();
         for (KeptChunk chunk : chunks) {
             if (store.add(chunk)) {
-                loader.keepLoaded(chunk);
-                added++;
+                added.add(chunk);
             }
         }
-        if (added > 0) {
+        if (!added.isEmpty()) {
+            loader.keepLoaded(added);
             store.save();
         }
-        return added;
+        return added.size();
     }
 
     /** @return how many of the chunks were kept before */
     public int release(Collection<KeptChunk> chunks) {
-        int removed = 0;
+        List<KeptChunk> removed = new ArrayList<>();
         for (KeptChunk chunk : chunks) {
             if (store.remove(chunk)) {
-                loader.release(chunk);
-                removed++;
+                removed.add(chunk);
             }
         }
-        if (removed > 0) {
+        if (!removed.isEmpty()) {
+            loader.release(removed);
             store.save();
         }
-        return removed;
+        return removed.size();
     }
 }

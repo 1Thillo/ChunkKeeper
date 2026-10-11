@@ -1,6 +1,7 @@
 package de.thillo.chunkkeeper;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -36,15 +37,17 @@ public final class ChunkKeeper extends JavaPlugin {
 
     /** Force-loads every kept chunk whose world is currently loaded. */
     void keepAllLoaded() {
+        List<KeptChunk> loadable = new ArrayList<>();
         int missingWorlds = 0;
         for (KeptChunk chunk : store.all()) {
             if (Bukkit.getWorld(chunk.world()) == null) {
                 missingWorlds++;
             } else {
-                loader.keepLoaded(chunk);
+                loadable.add(chunk);
             }
         }
-        getLogger().info("Keeping " + (store.size() - missingWorlds) + " chunks loaded.");
+        loader.keepLoaded(loadable);
+        getLogger().info("Keeping " + loadable.size() + " chunks loaded.");
         if (missingWorlds > 0) {
             getLogger().info(missingWorlds + " chunks belong to worlds that are not loaded yet; they follow when their world loads.");
         }
@@ -60,11 +63,8 @@ public final class ChunkKeeper extends JavaPlugin {
 
         Set<KeptChunk> before = store.all();
         store.load();
-        for (KeptChunk chunk : before) {
-            if (!store.contains(chunk)) {
-                loader.release(chunk);
-            }
-        }
+        List<KeptChunk> removed = before.stream().filter(chunk -> !store.contains(chunk)).toList();
+        loader.release(removed);
         keepAllLoaded();
     }
 

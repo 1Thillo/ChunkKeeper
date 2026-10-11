@@ -3,6 +3,8 @@ package de.thillo.chunkkeeper.command;
 import java.util.List;
 import java.util.Optional;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
@@ -41,8 +43,9 @@ final class ChunkInfoCommand implements Subcommand {
         }
         KeptChunk chunk = target.get();
         boolean kept = plugin.store().contains(chunk);
-        // Asking the world about a chunk has to happen on the thread that owns it (Folia).
-        plugin.loader().runAt(chunk, world -> {
+        World world = Bukkit.getWorld(chunk.world());
+        // On Folia the force-load flags may only be read on the global region thread.
+        plugin.loader().runGlobal(() -> {
             boolean forceLoaded = world.isChunkForceLoaded(chunk.x(), chunk.z());
             sender.sendMessage(Messages.info("Chunk " + chunk.describe()));
             sender.sendMessage(Messages.field("Blocks", "x " + (chunk.x() * 16) + " to " + (chunk.x() * 16 + 15)
