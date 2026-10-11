@@ -10,17 +10,19 @@ public final class ChunkKeeper extends JavaPlugin {
 
     private ChunkStore store;
     private ChunkLoader loader;
+    private Settings settings;
 
     @Override
     public void onEnable() {
-        getDataFolder().mkdirs();
+        saveDefaultConfig();
+        settings = Settings.from(getConfig());
         store = new ChunkStore(new File(getDataFolder(), "chunks.yml"), getLogger());
         loader = new ChunkLoader(this);
 
         store.load();
         keepAllLoaded();
 
-        Bukkit.getPluginManager().registerEvents(new WorldListener(store, loader), this);
+        Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
         registerCommand("chunkkeeper", "Keep chunks loaded.", List.of("ck"), new ChunkKeeperCommand(this));
     }
 
@@ -46,5 +48,9 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public ChunkLoader loader() {
         return loader;
+    }
+
+    public Settings settings() {
+        return settings;
     }
 }
