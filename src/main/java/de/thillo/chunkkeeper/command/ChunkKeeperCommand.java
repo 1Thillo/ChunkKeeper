@@ -33,6 +33,10 @@ public final class ChunkKeeperCommand implements BasicCommand {
         this.permissions = plugin.permissions();
         add(new ChunkCommand(plugin, true));
         add(new ChunkCommand(plugin, false));
+        add(new ReleaseAllCommand(plugin));
+        add(new ListCommand(plugin));
+        add(new ChunkInfoCommand(plugin));
+        add(new ReloadCommand(plugin));
         add(new VersionCommand(plugin));
     }
 

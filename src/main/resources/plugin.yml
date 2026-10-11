@@ -14,13 +14,25 @@ permissions:
     children:
       chunkkeeper.help: true
       chunkkeeper.version: true
+      chunkkeeper.list: true
+      chunkkeeper.chunkinfo: true
+      chunkkeeper.reload: true
       chunkkeeper.keepchunk: true
       chunkkeeper.releasechunk: true
+      chunkkeeper.releaseall: true
   chunkkeeper.help:
     default: op
   chunkkeeper.version:
     default: op
+  chunkkeeper.list:
+    default: op
+  chunkkeeper.chunkinfo:
+    default: op
+  chunkkeeper.reload:
+    default: op
   chunkkeeper.keepchunk:
     default: op
   chunkkeeper.releasechunk:
+    default: op
+  chunkkeeper.releaseall:
     default: op

@@ -2,6 +2,7 @@ package de.thillo.chunkkeeper;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,7 +13,8 @@ public final class ChunkKeeper extends JavaPlugin {
 
     private ChunkStore store;
     private ChunkLoader loader;
-    private Settings settings;
+    // volatile: /chunkkeeper reload replaces it while other threads may be reading it (Folia)
+    private volatile Settings settings;
     private Permissions permissions;
     private Keeper keeper;
 
@@ -46,6 +48,24 @@ public final class ChunkKeeper extends JavaPlugin {
         if (missingWorlds > 0) {
             getLogger().info(missingWorlds + " chunks belong to worlds that are not loaded yet; they follow when their world loads.");
         }
+    }
+
+    /**
+     * Reads config.yml and chunks.yml again. Chunks that were removed from the file are released,
+     * all others are force-loaded (again).
+     */
+    public void reload() {
+        reloadConfig();
+        settings = Settings.from(getConfig());
+
+        Set<KeptChunk> before = store.all();
+        store.load();
+        for (KeptChunk chunk : before) {
+            if (!store.contains(chunk)) {
+                loader.release(chunk);
+            }
+        }
+        keepAllLoaded();
     }
 
     public ChunkStore store() {
