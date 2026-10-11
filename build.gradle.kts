@@ -27,6 +27,11 @@ dependencies {
     compileOnly("com.sk89q.worldguard:worldguard-core:7.0.19") {
         isTransitive = false
     }
+
+    testImplementation("io.papermc.paper:paper-api:26.2.build.128-stable")
+    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 java {
@@ -48,6 +53,9 @@ tasks {
         filesMatching("plugin.yml") {
             expand(mapOf("version" to pluginVersion))
         }
+    }
+    test {
+        useJUnitPlatform()
     }
     runServer {
         minecraftVersion("26.2")
