@@ -6,6 +6,7 @@ folia-supported: true
 description: Keep selected chunks loaded, even when no players are around.
 author: Thillo
 website: https://github.com/1Thillo/ChunkKeeper
+softdepend: [WorldEdit, FastAsyncWorldEdit, WorldGuard]
 
 permissions:
   chunkkeeper.*:
@@ -20,6 +21,8 @@ permissions:
       chunkkeeper.import: true
       chunkkeeper.keepchunk: true
       chunkkeeper.releasechunk: true
+      chunkkeeper.keepregion: true
+      chunkkeeper.releaseregion: true
       chunkkeeper.releaseall: true
   chunkkeeper.help:
     default: op
@@ -36,6 +39,10 @@ permissions:
   chunkkeeper.keepchunk:
     default: op
   chunkkeeper.releasechunk:
+    default: op
+  chunkkeeper.keepregion:
+    default: op
+  chunkkeeper.releaseregion:
     default: op
   chunkkeeper.releaseall:
     default: op

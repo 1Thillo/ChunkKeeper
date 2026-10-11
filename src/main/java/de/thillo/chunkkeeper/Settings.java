@@ -7,13 +7,15 @@ public record Settings(
         boolean releaseAllConsoleOnly,
         boolean preventWorldUnload,
         boolean legacyPermissions,
-        int railSearchLimit) {
+        int railSearchLimit,
+        int maxAreaChunks) {
 
     public static Settings from(FileConfiguration config) {
         return new Settings(
                 config.getBoolean("release-all-console-only", true),
                 config.getBoolean("prevent-world-unload", true),
                 config.getBoolean("legacy-permissions", true),
-                Math.max(1, config.getInt("rail-search-limit", 50000)));
+                Math.max(1, config.getInt("rail-search-limit", 50000)),
+                Math.max(1, config.getInt("max-area-chunks", 10000)));
     }
 }

@@ -9,10 +9,24 @@ version = "0.1.0"
 repositories {
     mavenCentral()
     maven(url = uri("https://repo.papermc.io/repository/maven-public/"))
+    maven(url = uri("https://maven.enginehub.org/repo/"))
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.128-stable")
+    // Optional: only used when WorldEdit/FastAsyncWorldEdit or WorldGuard is installed
+    compileOnly("com.sk89q.worldedit:worldedit-bukkit:7.4.5") {
+        isTransitive = false
+    }
+    compileOnly("com.sk89q.worldedit:worldedit-core:7.4.5") {
+        isTransitive = false
+    }
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.19") {
+        isTransitive = false
+    }
+    compileOnly("com.sk89q.worldguard:worldguard-core:7.0.19") {
+        isTransitive = false
+    }
 }
 
 java {
