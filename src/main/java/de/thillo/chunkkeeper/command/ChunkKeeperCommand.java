@@ -99,7 +99,7 @@ public final class ChunkKeeperCommand implements BasicCommand {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(Messages.info("ChunkKeeper commands (alias /ck):"));
+        sender.sendMessage(Messages.info("ChunkKeeper commands (aliases /keepchunks, /chk):"));
         for (Subcommand subcommand : subcommands.values()) {
             if (permissions.has(sender, subcommand.name())) {
                 sender.sendMessage(Component.text("/chunkkeeper " + subcommand.name() + " " + subcommand.usage(), NamedTextColor.WHITE)

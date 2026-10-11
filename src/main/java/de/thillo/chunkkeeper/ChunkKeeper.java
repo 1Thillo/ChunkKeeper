@@ -32,7 +32,7 @@ public final class ChunkKeeper extends JavaPlugin {
         keepAllLoaded();
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
-        registerCommand("chunkkeeper", "Keep chunks loaded.", List.of("ck"), new ChunkKeeperCommand(this));
+        registerCommand("chunkkeeper", "Keep chunks loaded.", List.of("keepchunks", "chk"), new ChunkKeeperCommand(this));
     }
 
     /** Force-loads every kept chunk whose world is currently loaded. */
