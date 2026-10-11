@@ -3,10 +3,12 @@ package de.thillo.chunkkeeper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import de.thillo.chunkkeeper.command.ChunkKeeperCommand;
@@ -51,7 +53,15 @@ public final class ChunkKeeper extends JavaPlugin {
         warnIfKeepChunksIsInstalled();
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
-        registerCommand("chunkkeeper", "Keep chunks loaded.", List.of("keepchunks", "chk"), new ChunkKeeperCommand(this));
+        registerCommand();
+    }
+
+    private void registerCommand() {
+        PluginCommand command = Objects.requireNonNull(getCommand("chunkkeeper"), "chunkkeeper missing in plugin.yml");
+        ChunkKeeperCommand handler = new ChunkKeeperCommand(this);
+        command.setExecutor(handler);
+        command.setTabCompleter(handler);
+        command.setPermission(handler.visibilityPermissions(settings.legacyPermissions()));
     }
 
     private void finishImport(KeepChunksImporter.Result result) {
