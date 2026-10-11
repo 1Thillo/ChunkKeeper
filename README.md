@@ -121,6 +121,12 @@ In VS Code, start the debug configuration **Attach to dev server (hotswap)**. Sa
 then applied to the running server ("hot code replace"), including new methods and fields. Changes
 to `plugin.yml`, new commands or listeners and code in `onEnable` still need a restart of the task.
 
+## Dependency updates
+
+Dependabot checks the Gradle dependencies and GitHub Actions every week. Patch and minor updates
+are merged automatically once the CI build is green; major updates stay open as pull requests for
+a manual look.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
