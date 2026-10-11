@@ -1,0 +1,19 @@
+# Dependabot opens pull requests when a dependency or GitHub Action has a new version.
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # minor and patch updates arrive together in one PR instead of one PR each
+      gradle-minor-and-patch:
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
