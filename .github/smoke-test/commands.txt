@@ -10,6 +10,8 @@ keepchunks releaseregion coords 20 20 22 21 world
 chk keepregion coords 0 0 1000 1000 world
 # A small railway across chunk borders: 41 rails along x, 10 along z
 minecraft:forceload add 992 992 1072 1024
+# Folia loads force-loaded chunks in the background, so give it a moment before /fill
+wait 8
 minecraft:fill 1000 199 1000 1040 199 1000 stone
 minecraft:fill 1000 200 1000 1040 200 1000 rail
 minecraft:fill 1040 199 1001 1040 199 1010 stone
