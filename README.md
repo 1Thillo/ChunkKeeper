@@ -8,6 +8,7 @@ familiar command names and takes over KeepChunks' chunks automatically on its fi
 
 - Paper and Folia 26.2, Java 25
 - Single chunks, rectangular areas, WorldEdit selections, WorldGuard regions and whole railways
+- Named areas, such as an event area or a railway, that are kept and released as a whole
 - Optional: WorldEdit or FastAsyncWorldEdit, WorldGuard
 
 ## Installation
@@ -43,16 +44,38 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `keepregion coords <x1> <z1> <x2> <z2> <world>` | Keep all chunks between two corners loaded |
 | `keepregion worldedit` | Keep every chunk touched by your WorldEdit selection loaded |
 | `keepregion worldguard <region> <world>` | Keep every chunk touched by a WorldGuard region loaded |
-| `releaseregion ...` | The same areas, released |
+| `keepregion ... --name <name>` | The same, but as a named area (see below) |
+| `releaseregion ...` | The same areas, released (single chunks only) |
 | `keeprail current \| coords <x> <y> <z> <world>` | Follow a railway from a rail block and keep every chunk along it loaded, plus the chunks right next to it |
-| `releaserail ...` | The same railway, released |
-| `releaseall confirm` | Release every chunk (console only by default) |
+| `keeprail ... --name <name>` | The same, but as a named area |
+| `releaserail ...` | The same railway, released (single chunks only) |
+| `area list` | All named areas |
+| `area info <name>` | World, size and origin of a named area |
+| `area release <name>` | Release a named area |
+| `area rename <name> <new name>` | Rename a named area |
+| `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
-| `list [<world> [page]]` | Kept chunks per world, or the chunks of one world |
+| `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
 | `import` | Add the chunks from KeepChunks' `data.yml` again |
 | `reload` | Reload `config.yml` and `chunks.yml` |
 | `version` | Plugin and server version |
 | `help` | The commands you may use |
+
+### Single chunks and named areas
+
+Areas and railways can be kept in two ways, and both can be used side by side:
+
+- **As single chunks** (`keepregion ...` without a name): every chunk is kept on its own, like
+  KeepChunks did. You can later release any part of it with `releasechunk` or `releaseregion`.
+- **As a named area** (`keepregion ... --name halloween`): the chunks are kept as one group.
+  `list` shows "halloween: 140 chunks" instead of 140 lines, and `area release halloween` releases
+  the whole group at once.
+
+A chunk stays loaded as long as anything keeps it: itself, or at least one named area. Releasing
+a single chunk that also belongs to an area leaves it loaded, and releasing an area leaves the
+chunks loaded that are kept on their own or by another area. `chunkinfo` shows what keeps a chunk.
+
+Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 
 ## Permissions
 
@@ -71,7 +94,8 @@ Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
 | `rail-search-limit` | `50000` | `keeprail` stops after this many rail blocks |
 | `max-area-chunks` | `10000` | `keepregion`/`releaseregion` refuse larger areas, so a typo cannot force-load millions of chunks |
 
-The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`, one `x,z,world` line per chunk.
+The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`: single chunks under `chunks`, one
+`x,z,world` line each, and named areas under `areas`.
 Edit it only while the server is stopped, or run `/chunkkeeper reload` afterwards.
 
 ## How it works
