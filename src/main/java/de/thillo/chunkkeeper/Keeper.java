@@ -2,6 +2,7 @@ package de.thillo.chunkkeeper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -100,6 +101,57 @@ public final class Keeper {
         loader.release(nowUnloaded);
         store.save();
         return Optional.of(new AreaRelease(area.get(), nowUnloaded.size()));
+    }
+
+    /**
+     * Turns the single chunks inside {@code selection} into a new named area. Chunks in the selection
+     * that are not kept on their own are left out. Nothing is unloaded or loaded: every chunk is kept
+     * the whole time, first on its own and then by the area.
+     *
+     * @return how many chunks were moved into the area (0 means nothing to convert and no area was
+     *         made), or empty if the name is taken
+     */
+    public synchronized Optional<Integer> convertToArea(String name, String world, Collection<KeptChunk> selection, String source) {
+        if (store.area(name).isPresent()) {
+            return Optional.empty();
+        }
+        Set<KeptChunk> singles = new HashSet<>();
+        for (KeptChunk chunk : selection) {
+            if (store.contains(chunk)) {
+                singles.add(chunk);
+            }
+        }
+        if (singles.isEmpty()) {
+            return Optional.of(0);
+        }
+        // add the area before removing the single chunks, so the chunks are never "not kept"
+        store.addArea(new NamedArea(name, world, singles, source));
+        for (KeptChunk chunk : singles) {
+            store.remove(chunk);
+        }
+        store.save();
+        return Optional.of(singles.size());
+    }
+
+    /**
+     * Removes a named area but keeps all its chunks, now on their own. Nothing is unloaded.
+     *
+     * @return how many of its chunks were not kept on their own before, or empty if there is no such area
+     */
+    public synchronized Optional<Integer> dissolveArea(String name) {
+        Optional<NamedArea> area = store.area(name);
+        if (area.isEmpty()) {
+            return Optional.empty();
+        }
+        int added = 0;
+        for (KeptChunk chunk : area.get().chunks()) {
+            if (store.add(chunk)) {
+                added++;
+            }
+        }
+        store.removeArea(name);
+        store.save();
+        return Optional.of(added);
     }
 
     /** @return false if the new name is taken or the old one does not exist */

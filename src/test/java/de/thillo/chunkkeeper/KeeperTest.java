@@ -107,6 +107,43 @@ class KeeperTest {
     }
 
     @Test
+    void convertMovesOnlySingleChunksAndUnloadsNothing() {
+        keeper.keep(List.of(A, B));
+        Set<KeptChunk> forcedBefore = Set.copyOf(loader.forced);
+        // the selection also covers C, which is not kept, so it must not end up in the area
+        assertEquals(Optional.of(2), keeper.convertToArea("block", "w", List.of(A, B, C), "test"));
+        assertEquals(Set.of(A, B), store.area("block").orElseThrow().chunks());
+        assertTrue(store.all().isEmpty());
+        assertEquals(forcedBefore, loader.forced);
+    }
+
+    @Test
+    void convertWithNothingToMoveMakesNoArea() {
+        assertEquals(Optional.of(0), keeper.convertToArea("empty", "w", List.of(A), "test"));
+        assertTrue(store.area("empty").isEmpty());
+    }
+
+    @Test
+    void convertRefusesATakenName() {
+        keeper.keep(List.of(A));
+        keeper.createArea(area("farm", B));
+        assertEquals(Optional.empty(), keeper.convertToArea("farm", "w", List.of(A), "test"));
+        assertTrue(store.contains(A));
+    }
+
+    @Test
+    void dissolveTurnsTheAreaIntoSingleChunksAndUnloadsNothing() {
+        keeper.keep(List.of(A));
+        keeper.createArea(area("farm", A, B));
+        Set<KeptChunk> forcedBefore = Set.copyOf(loader.forced);
+        assertEquals(Optional.of(1), keeper.dissolveArea("farm"));
+        assertEquals(Set.of(A, B), store.all());
+        assertTrue(store.area("farm").isEmpty());
+        assertEquals(forcedBefore, loader.forced);
+        assertEquals(Optional.empty(), keeper.dissolveArea("farm"));
+    }
+
+    @Test
     void releaseAllClearsEverything() {
         keeper.keep(List.of(A));
         keeper.createArea(area("farm", B, C));
