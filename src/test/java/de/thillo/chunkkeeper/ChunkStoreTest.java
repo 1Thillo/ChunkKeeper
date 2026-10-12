@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -67,6 +68,69 @@ class ChunkStoreTest {
         assertEquals(2, store.inWorld("a").size());
         assertTrue(store.hasWorld("b"));
         assertFalse(store.hasWorld("c"));
+    }
+
+    @Test
+    void areasComeBackAfterLoading() {
+        ChunkStore store = newStore();
+        store.add(new KeptChunk("world", 1, 1));
+        NamedArea area = new NamedArea("halloween", "event", Set.of(new KeptChunk("event", 0, 0), new KeptChunk("event", -1, 2)),
+                "WorldGuard region 'halloween' in 'event'");
+        assertTrue(store.addArea(area));
+        store.save();
+
+        ChunkStore reloaded = newStore();
+        reloaded.load();
+        assertEquals(Optional.of(area), reloaded.area("halloween"));
+        assertEquals(Set.of(new KeptChunk("world", 1, 1)), reloaded.all());
+    }
+
+    @Test
+    void areaNamesAreUnique() {
+        ChunkStore store = newStore();
+        assertTrue(store.addArea(new NamedArea("a", "w", Set.of(), "")));
+        assertFalse(store.addArea(new NamedArea("a", "w", Set.of(new KeptChunk("w", 1, 1)), "")));
+    }
+
+    @Test
+    void singleChunksAndAreasCountTogether() {
+        ChunkStore store = newStore();
+        KeptChunk single = new KeptChunk("w", 1, 1);
+        KeptChunk inArea = new KeptChunk("w", 5, 5);
+        store.add(single);
+        store.addArea(new NamedArea("farm", "w", Set.of(inArea, single), ""));
+
+        assertTrue(store.isKept(single));
+        assertTrue(store.isKept(inArea));
+        assertFalse(store.contains(inArea));
+        assertFalse(store.isKept(new KeptChunk("w", 9, 9)));
+        assertEquals(Set.of(single, inArea), store.allKept());
+        assertEquals(List.of("farm"), store.areasContaining(single));
+    }
+
+    @Test
+    void worldWithOnlyAnAreaCounts() {
+        ChunkStore store = newStore();
+        store.addArea(new NamedArea("farm", "nether", Set.of(new KeptChunk("nether", 0, 0)), ""));
+        assertTrue(store.hasWorld("nether"));
+    }
+
+    @Test
+    void unreadableAreasAreSkipped() throws IOException {
+        Files.writeString(folder.resolve("chunks.yml"), """
+                areas:
+                  Bad.Name:
+                    world: w
+                  nowWorld:
+                    chunks: ['1,2']
+                  good:
+                    world: w
+                    chunks: ['1,2', 'nonsense']
+                """);
+        ChunkStore store = newStore();
+        store.load();
+        assertEquals(List.of("good"), store.areas().stream().map(NamedArea::name).toList());
+        assertEquals(Set.of(new KeptChunk("w", 1, 2)), store.area("good").orElseThrow().chunks());
     }
 
     @Test

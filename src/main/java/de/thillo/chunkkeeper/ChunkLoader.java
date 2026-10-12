@@ -19,7 +19,7 @@ import org.bukkit.plugin.Plugin;
  * <p>A force-loaded chunk stays loaded without players nearby, and Minecraft saves that flag with
  * the world.
  */
-public final class ChunkLoader {
+public final class ChunkLoader implements ForceLoader {
 
     private final Plugin plugin;
 
@@ -27,10 +27,12 @@ public final class ChunkLoader {
         this.plugin = plugin;
     }
 
+    @Override
     public void keepLoaded(Collection<KeptChunk> chunks) {
         setForceLoaded(chunks, true);
     }
 
+    @Override
     public void release(Collection<KeptChunk> chunks) {
         setForceLoaded(chunks, false);
     }

@@ -59,7 +59,7 @@ final class ChunkInfoCommand implements Subcommand {
         if (area.isEmpty()) {
             return;
         }
-        long kept = area.get().chunks().stream().filter(plugin.store()::contains).count();
+        long kept = area.get().chunks().stream().filter(plugin.store()::isKept).count();
         sender.sendMessage(Messages.info("Area: " + area.get().description()));
         sender.sendMessage(Messages.field("Chunks in the area", String.valueOf(area.get().chunks().size())));
         sender.sendMessage(Messages.field("Kept by ChunkKeeper", String.valueOf(kept)));
@@ -71,7 +71,9 @@ final class ChunkInfoCommand implements Subcommand {
             return;
         }
         KeptChunk chunk = target.get();
-        boolean kept = plugin.store().contains(chunk);
+        boolean kept = plugin.store().isKept(chunk);
+        boolean single = plugin.store().contains(chunk);
+        List<String> areas = plugin.store().areasContaining(chunk);
         World world = Bukkit.getWorld(chunk.world());
         // On Folia the force-load flags may only be read on the global region thread.
         plugin.loader().runGlobal(() -> {
@@ -80,6 +82,8 @@ final class ChunkInfoCommand implements Subcommand {
             sender.sendMessage(Messages.field("Blocks", "x " + (chunk.x() * 16) + " to " + (chunk.x() * 16 + 15)
                     + ", z " + (chunk.z() * 16) + " to " + (chunk.z() * 16 + 15)));
             sender.sendMessage(Messages.yesNo("Kept by ChunkKeeper", kept));
+            sender.sendMessage(Messages.yesNo("Kept on its own", single));
+            sender.sendMessage(Messages.field("Named areas", areas.isEmpty() ? "none" : String.join(", ", areas)));
             sender.sendMessage(Messages.yesNo("Force-loaded", forceLoaded));
             sender.sendMessage(Messages.yesNo("Loaded right now", world.isChunkLoaded(chunk.x(), chunk.z())));
             if (kept != forceLoaded) {

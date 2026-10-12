@@ -6,9 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
+import de.thillo.chunkkeeper.Keeper;
 import de.thillo.chunkkeeper.Messages;
 
-/** {@code releaseall confirm}: empties the whole list. Console only, unless config.yml allows more. */
+/** {@code releaseall confirm}: releases every single chunk and every named area. Console only, unless config.yml allows more. */
 final class ReleaseAllCommand implements Subcommand {
 
     private final ChunkKeeper plugin;
@@ -39,12 +40,12 @@ final class ReleaseAllCommand implements Subcommand {
             return;
         }
         if (args.length != 1 || !args[0].equalsIgnoreCase("confirm")) {
-            sender.sendMessage(Messages.error("This releases all " + plugin.store().size()
-                    + " kept chunks. Type /chunkkeeper releaseall confirm to do it."));
+            sender.sendMessage(Messages.error("This releases all " + plugin.store().size() + " single chunks and all "
+                    + plugin.store().areas().size() + " named areas. Type /chunkkeeper releaseall confirm to do it."));
             return;
         }
-        int released = plugin.keeper().release(plugin.store().all());
-        sender.sendMessage(Messages.success("Released " + released + " chunks."));
+        Keeper.ReleaseAll released = plugin.keeper().releaseAll();
+        sender.sendMessage(Messages.success("Released " + released.chunks() + " chunks and " + released.areas() + " named areas."));
     }
 
     @Override

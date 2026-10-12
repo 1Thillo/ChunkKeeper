@@ -19,7 +19,7 @@ final class WorldListener implements Listener {
 
     @EventHandler
     public void onWorldLoad(WorldLoadEvent event) {
-        plugin.loader().keepLoaded(plugin.store().inWorld(event.getWorld().getName()));
+        plugin.loader().keepLoaded(plugin.store().allKeptInWorld(event.getWorld().getName()));
     }
 
     @EventHandler(ignoreCancelled = true)
