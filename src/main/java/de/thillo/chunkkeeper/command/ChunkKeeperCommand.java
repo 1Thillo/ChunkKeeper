@@ -41,6 +41,7 @@ public final class ChunkKeeperCommand implements CommandExecutor, TabCompleter {
         add(new RegionCommand(plugin, false));
         add(new RailCommand(plugin, true));
         add(new RailCommand(plugin, false));
+        add(new AreaCommand(plugin));
         add(new ReleaseAllCommand(plugin));
         add(new ListCommand(plugin));
         add(new ChunkInfoCommand(plugin));
