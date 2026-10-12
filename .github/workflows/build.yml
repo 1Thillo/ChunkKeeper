@@ -93,7 +93,8 @@ jobs:
 
 
   publish:
-    needs: build
+    # only attach a jar to a release that also passed the smoke test on real servers
+    needs: [ build, smoke-test ]
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
 
