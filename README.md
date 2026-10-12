@@ -53,6 +53,8 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `area info <name>` | World, size and origin of a named area |
 | `area release <name>` | Release a named area |
 | `area rename <name> <new name>` | Rename a named area |
+| `area convert <name> (coords ... \| worldedit \| worldguard <region> <world> \| world <world>)` | Turn the single chunks inside a selection into a named area |
+| `area dissolve <name>` | Turn a named area back into single chunks |
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
 | `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
@@ -74,6 +76,12 @@ Areas and railways can be kept in two ways, and both can be used side by side:
 A chunk stays loaded as long as anything keeps it: itself, or at least one named area. Releasing
 a single chunk that also belongs to an area leaves it loaded, and releasing an area leaves the
 chunks loaded that are kept on their own or by another area. `chunkinfo` shows what keeps a chunk.
+
+Existing single chunks can be grouped later with `area convert`, for example the chunks imported
+from KeepChunks: `area convert halloween worldguard halloween halloween` moves the single chunks
+inside that WorldGuard region into the area `halloween`, and `area convert event world event` takes
+all single chunks of the world `event`. Chunks in the selection that are not kept are left out.
+`area dissolve <name>` does the opposite. Neither of them unloads a chunk on the way.
 
 Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 
