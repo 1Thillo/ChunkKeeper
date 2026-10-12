@@ -1,0 +1,65 @@
+# Changelog
+
+All notable changes to ChunkKeeper are listed here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Added
+- Issue forms for bug reports and feature requests.
+- This changelog.
+
+### Changed
+- Release jars are only attached after the smoke test on Paper and Folia passed.
+- The dependency graph sent to GitHub only lists what the plugin jar ships and the Gradle build
+  itself, so Dependabot alerts concern ChunkKeeper directly.
+
+## [1.1.0] - 2026-10-12
+
+### Added
+- Named areas: groups of chunks that are kept and released as a whole, next to single chunks.
+  - `keepregion ... --name <name>` and `keeprail ... --name <name>` create one.
+  - `/chunkkeeper area list | info <name> | release <name> | rename <name> <new name>`.
+  - `area convert <name> (coords ... | worldedit | worldguard <region> <world> | world <world>)`
+    turns existing single chunks into a named area, for example the chunks imported from KeepChunks.
+  - `area dissolve <name>` turns an area back into single chunks.
+  - New permission `chunkkeeper.area`.
+- A smoke test that runs every pull request on real Paper and Folia servers.
+
+### Changed
+- A chunk stays loaded as long as anything keeps it: itself or at least one named area.
+  `chunkinfo` shows what keeps a chunk, `list` shows the named areas, `reload` and `releaseall`
+  include them. Converting and dissolving never unload a chunk.
+
+## [1.0.1] - 2026-10-11
+
+### Fixed
+- `/chunkkeeper` no longer disappears when the plugin is reloaded with PlugMan (reload, or unload
+  and load). Kept chunks stay loaded during a reload.
+
+### Changed
+- `/kc` and `/ck` are aliases again, next to `/keepchunks` and `/chk`. EssentialsX leaves them to
+  ChunkKeeper now.
+
+### Added
+- `./gradlew runServer` starts a development server with hotswap support.
+
+## [1.0.0] - 2026-10-11
+
+First release, a replacement for the discontinued KeepChunks plugin with Folia support.
+
+### Added
+- Keep single chunks, rectangular areas, WorldEdit/FastAsyncWorldEdit selections, WorldGuard
+  regions (exact shape, also polygons) and whole minecart railways loaded.
+- `chunkinfo`, `list`, `reload`, `releaseall confirm`, `import`, `version` and `help`.
+- One permission per subcommand (`chunkkeeper.<subcommand>`); the old `keepchunks.<subcommand>`
+  permissions keep working.
+- Automatic import of KeepChunks' chunks and its `releaseallprotection` setting on the first start.
+- Safety limits `max-area-chunks` and `rail-search-limit`.
+- Paper and Folia 26.2 support.
+
+[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/1Thillo/ChunkKeeper/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/1Thillo/ChunkKeeper/releases/tag/v1.0.0
