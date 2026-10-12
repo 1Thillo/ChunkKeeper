@@ -1,7 +1,12 @@
 name: Dependency submission
 
 # Sends the resolved Gradle dependencies to GitHub's dependency graph. Dependabot alerts can only
-# warn about vulnerable libraries in a Gradle project once GitHub knows the full dependency list.
+# warn about vulnerable libraries in a Gradle project once GitHub knows the dependency list.
+#
+# Compile-only and test dependencies are left out: paper-api, WorldEdit, WorldGuard and JUnit are
+# never bundled into the plugin jar (the server provides its own copies), so alerts for their
+# transitive libraries would not concern ChunkKeeper. What remains is what the jar ships
+# (runtimeClasspath) and the Gradle build itself.
 on:
   push:
     branches: [ "master" ]
@@ -23,3 +28,5 @@ jobs:
         distribution: 'temurin'
     - name: Submit the dependency graph
       uses: gradle/actions/dependency-submission@v6
+      with:
+        dependency-graph-exclude-configurations: '.*[Cc]ompileClasspath|test.*|annotationProcessor'
