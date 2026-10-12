@@ -11,6 +11,8 @@ familiar command names and takes over KeepChunks' chunks automatically on its fi
 - Named areas, such as an event area or a railway, that are kept and released as a whole
 - Optional: WorldEdit or FastAsyncWorldEdit, WorldGuard
 
+What changed in each version is listed in the [changelog](CHANGELOG.md).
+
 ## Installation
 
 1. Put `ChunkKeeper-<version>.jar` into the `plugins` folder.
