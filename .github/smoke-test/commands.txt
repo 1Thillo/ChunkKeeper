@@ -1,0 +1,24 @@
+# Console commands for the smoke test, one per line. "wait <seconds>" pauses.
+chk version
+chk list
+chk keepchunk coords 3 4 world
+chk chunkinfo coords 3 4 world
+chk releasechunk coords 3 4 world
+kc keepregion coords 20 20 22 21 world
+ck chunkinfo coords 20 20 22 21 world
+keepchunks releaseregion coords 20 20 22 21 world
+chk keepregion coords 0 0 1000 1000 world
+# A small railway across chunk borders: 41 rails along x, 10 along z
+minecraft:forceload add 992 992 1072 1024
+minecraft:fill 1000 199 1000 1040 199 1000 stone
+minecraft:fill 1000 200 1000 1040 200 1000 rail
+minecraft:fill 1040 199 1001 1040 199 1010 stone
+minecraft:fill 1040 200 1001 1040 200 1010 rail
+minecraft:forceload remove all
+chk keeprail coords 1020 200 1000 world
+wait 3
+chk releaserail coords 1020 200 1000 world
+wait 3
+chk reload
+chk releaseall confirm
+chk list

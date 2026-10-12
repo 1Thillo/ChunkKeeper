@@ -1,0 +1,19 @@
+# Text that has to appear in the server log, one per line (plain text, no patterns).
+Enabling ChunkKeeper
+First start: imported 2 chunks
+Could not read these KeepChunks entries: [broken]
+ChunkKeeper v
+2 chunks are kept loaded:
+Keeping chunk (3, 4) in 'world' loaded.
+Kept by ChunkKeeper: yes
+Force-loaded: yes
+Released chunk (3, 4) in 'world'.
+Keeping 6 more chunks loaded
+Chunks in the area: 6
+Released 6 of the 6 chunks
+more than the limit of 10000
+Found 51 rails. Keeping 21 more chunks loaded
+Found 51 rails. Released 21 of the 21 chunks
+Reloaded. 2 chunks are kept loaded.
+Released 2 chunks.
+No chunks are kept loaded.
