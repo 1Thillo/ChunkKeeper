@@ -21,6 +21,20 @@ chk keeprail coords 1020 200 1000 world
 wait 3
 chk releaserail coords 1020 200 1000 world
 wait 3
+# Named areas next to single chunks, including overlaps
+chk keepregion coords 30 30 31 31 world --name testarea
+chk keepchunk coords 30 30 world
+chk releasechunk coords 30 30 world
+chk chunkinfo coords 30 30 world
+chk keepregion coords 30 30 31 31 world --name testarea
+chk keepregion coords 1 1 1 1 world --name Bad.Name
+chk area rename testarea farm
+chk area list
+chk keeprail coords 1020 200 1000 world --name line
+wait 3
+chk keepregion coords 61 61 62 62 world --name overlap
+chk area release line
+chk area release overlap
 chk reload
 chk releaseall confirm
 chk list
