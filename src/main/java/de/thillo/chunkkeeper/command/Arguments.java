@@ -14,6 +14,7 @@ import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.NamedArea;
 
 /** Small helpers for reading command arguments. They tell the sender what went wrong. */
 final class Arguments {
@@ -152,6 +153,46 @@ final class Arguments {
             }
         }
         return List.of();
+    }
+
+    /** The arguments without {@code --name <name>}, and the name if one was given. */
+    record Named(String[] rest, Optional<String> name) {
+    }
+
+    /**
+     * Splits off an optional {@code --name <name>}. Names are turned into lower case.
+     * Returns empty (and tells the sender) if the name is missing or not allowed.
+     */
+    static Optional<Named> named(CommandSender sender, String[] args) {
+        List<String> rest = new ArrayList<>();
+        String name = null;
+        for (int i = 0; i < args.length; i++) {
+            if (!args[i].equalsIgnoreCase("--name")) {
+                rest.add(args[i]);
+                continue;
+            }
+            if (i + 1 >= args.length) {
+                sender.sendMessage(Messages.error("Give a name after --name, e.g. --name halloween."));
+                return Optional.empty();
+            }
+            name = args[++i].toLowerCase();
+            if (!NamedArea.isValidName(name)) {
+                sender.sendMessage(Messages.error("'" + args[i] + "' is not a valid area name. Use up to 32 letters, digits, - and _."));
+                return Optional.empty();
+            }
+        }
+        return Optional.of(new Named(rest.toArray(String[]::new), Optional.ofNullable(name)));
+    }
+
+    /** Suggestions for the {@code --name} option: the option itself, or a placeholder after it. */
+    static Optional<List<String>> nameSuggestions(String[] args) {
+        if (args.length >= 2 && args[args.length - 2].equalsIgnoreCase("--name")) {
+            return Optional.of(List.of("<name>"));
+        }
+        if (args.length >= 1 && args[args.length - 1].startsWith("-")) {
+            return Optional.of(List.of("--name"));
+        }
+        return Optional.empty();
     }
 
     static void sendUsage(CommandSender sender, String command, String usage) {

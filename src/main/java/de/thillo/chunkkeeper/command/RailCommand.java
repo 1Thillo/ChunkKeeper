@@ -10,11 +10,13 @@ import org.bukkit.entity.Player;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.NamedArea;
 import de.thillo.chunkkeeper.rail.RailTracer;
 
 /**
  * {@code keeprail} and {@code releaserail}: follows a railway from a rail block and keeps (or
- * releases) every chunk along it, including the chunks right next to the track.
+ * releases) every chunk along it, including the chunks right next to the track. With
+ * {@code --name} the railway becomes a named area.
  */
 final class RailCommand implements Subcommand {
 
@@ -33,7 +35,7 @@ final class RailCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return "(current | coords <x> <y> <z> <world>)";
+        return keep ? "(current | coords <x> <y> <z> <world>) [--name <name>]" : "(current | coords <x> <y> <z> <world>)";
     }
 
     @Override
@@ -43,7 +45,20 @@ final class RailCommand implements Subcommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        Optional<Location> start = startPosition(sender, args);
+        Optional<Arguments.Named> named = Arguments.named(sender, args);
+        if (named.isEmpty()) {
+            return;
+        }
+        if (!keep && named.get().name().isPresent()) {
+            sender.sendMessage(Messages.error("To release a named area, use /chunkkeeper area release <name>."));
+            return;
+        }
+        Optional<String> areaName = named.get().name();
+        if (areaName.isPresent() && plugin.store().area(areaName.get()).isPresent()) {
+            sender.sendMessage(Messages.error("There is already an area called '" + areaName.get() + "'. Release it first or choose another name."));
+            return;
+        }
+        Optional<Location> start = startPosition(sender, named.get().rest());
         if (start.isEmpty()) {
             return;
         }
@@ -62,7 +77,18 @@ final class RailCommand implements Subcommand {
                         + " rails (rail-search-limit in config.yml). Only the part found so far is used."));
             }
             int total = result.chunks().size();
-            if (keep) {
+            if (areaName.isPresent()) {
+                String description = "the railway from " + at.getBlockX() + ", " + at.getBlockY() + ", " + at.getBlockZ()
+                        + " in '" + world.getName() + "'";
+                Optional<Integer> newlyLoaded = plugin.keeper().createArea(
+                        new NamedArea(areaName.get(), world.getName(), result.chunks(), description));
+                if (newlyLoaded.isEmpty()) {
+                    sender.sendMessage(Messages.error("There is already an area called '" + areaName.get() + "'."));
+                } else {
+                    sender.sendMessage(Messages.success("Found " + result.rails() + " rails. Created area '" + areaName.get()
+                            + "' with " + total + " chunks (" + newlyLoaded.get() + " of them were not kept before)."));
+                }
+            } else if (keep) {
                 int added = plugin.keeper().keep(result.chunks());
                 sender.sendMessage(Messages.success("Found " + result.rails() + " rails. Keeping " + added + " more chunks loaded ("
                         + total + " along the track, " + (total - added) + " were kept already)."));
@@ -92,6 +118,12 @@ final class RailCommand implements Subcommand {
 
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
+        if (keep) {
+            Optional<List<String>> nameOption = Arguments.nameSuggestions(args);
+            if (nameOption.isPresent()) {
+                return nameOption.get();
+            }
+        }
         if (args.length == 1) {
             return List.of("current", "coords");
         }
