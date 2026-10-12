@@ -80,11 +80,11 @@ public final class ChunkKeeper extends JavaPlugin {
         }
     }
 
-    /** Force-loads every kept chunk whose world is currently loaded. */
+    /** Force-loads every kept chunk (single chunks and named areas) whose world is currently loaded. */
     void keepAllLoaded() {
         List<KeptChunk> loadable = new ArrayList<>();
         int missingWorlds = 0;
-        for (KeptChunk chunk : store.all()) {
+        for (KeptChunk chunk : store.allKept()) {
             if (Bukkit.getWorld(chunk.world()) == null) {
                 missingWorlds++;
             } else {
@@ -106,9 +106,9 @@ public final class ChunkKeeper extends JavaPlugin {
         reloadConfig();
         settings = Settings.from(getConfig());
 
-        Set<KeptChunk> before = store.all();
+        Set<KeptChunk> before = store.allKept();
         store.load();
-        List<KeptChunk> removed = before.stream().filter(chunk -> !store.contains(chunk)).toList();
+        List<KeptChunk> removed = before.stream().filter(chunk -> !store.isKept(chunk)).toList();
         loader.release(removed);
         keepAllLoaded();
     }

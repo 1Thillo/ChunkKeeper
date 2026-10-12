@@ -15,5 +15,5 @@ more than the limit of 10000
 Found 51 rails. Keeping 21 more chunks loaded
 Found 51 rails. Released 21 of the 21 chunks
 Reloaded. 2 chunks are kept loaded.
-Released 2 chunks.
+Released 2 chunks and 0 named areas.
 No chunks are kept loaded.

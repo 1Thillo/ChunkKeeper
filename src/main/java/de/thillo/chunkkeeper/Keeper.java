@@ -3,48 +3,137 @@ package de.thillo.chunkkeeper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * Adds chunks to or removes them from the list, switches their force-load flag and saves the file.
- * All commands, the importer and the rail search go through here.
+ * Changes what is kept and switches the force-load flags to match. All commands, the importer and
+ * the rail search go through here.
+ *
+ * <p>Single chunks and named areas exist side by side. A chunk is force-loaded while anything keeps
+ * it: itself, or at least one area. So releasing a single chunk leaves it loaded if an area still
+ * contains it, and releasing an area leaves the chunks loaded that are kept on their own or by
+ * another area.
+ *
+ * <p>The methods are {@code synchronized}: on Folia two commands can run at the same time, and
+ * "is this chunk still kept by something?" must not change halfway through.
  */
 public final class Keeper {
 
     private final ChunkStore store;
-    private final ChunkLoader loader;
+    private final ForceLoader loader;
 
-    public Keeper(ChunkStore store, ChunkLoader loader) {
+    public Keeper(ChunkStore store, ForceLoader loader) {
         this.store = store;
         this.loader = loader;
     }
 
-    /** @return how many of the chunks were not kept before */
-    public int keep(Collection<KeptChunk> chunks) {
-        List<KeptChunk> added = new ArrayList<>();
+    /** Keeps chunks on their own. @return how many of them were not kept on their own before */
+    public synchronized int keep(Collection<KeptChunk> chunks) {
+        List<KeptChunk> nowLoaded = new ArrayList<>();
+        int added = 0;
         for (KeptChunk chunk : chunks) {
+            boolean wasKept = store.isKept(chunk);
             if (store.add(chunk)) {
-                added.add(chunk);
+                added++;
+                if (!wasKept) {
+                    nowLoaded.add(chunk);
+                }
             }
         }
-        if (!added.isEmpty()) {
-            loader.keepLoaded(added);
+        loader.keepLoaded(nowLoaded);
+        if (added > 0) {
             store.save();
         }
-        return added.size();
+        return added;
     }
 
-    /** @return how many of the chunks were kept before */
-    public int release(Collection<KeptChunk> chunks) {
-        List<KeptChunk> removed = new ArrayList<>();
+    /**
+     * Stops keeping chunks on their own. Chunks that belong to a named area stay loaded.
+     *
+     * @return how many of them were kept on their own before
+     */
+    public synchronized int release(Collection<KeptChunk> chunks) {
+        List<KeptChunk> nowUnloaded = new ArrayList<>();
+        int removed = 0;
         for (KeptChunk chunk : chunks) {
             if (store.remove(chunk)) {
-                removed.add(chunk);
+                removed++;
+                if (!store.isKept(chunk)) {
+                    nowUnloaded.add(chunk);
+                }
             }
         }
-        if (!removed.isEmpty()) {
-            loader.release(removed);
+        loader.release(nowUnloaded);
+        if (removed > 0) {
             store.save();
         }
-        return removed.size();
+        return removed;
+    }
+
+    /**
+     * Adds a named area.
+     *
+     * @return how many of its chunks were not kept by anything before, or empty if the name is taken
+     */
+    public synchronized Optional<Integer> createArea(NamedArea area) {
+        List<KeptChunk> nowLoaded = area.chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
+        if (!store.addArea(area)) {
+            return Optional.empty();
+        }
+        loader.keepLoaded(nowLoaded);
+        store.save();
+        return Optional.of(nowLoaded.size());
+    }
+
+    /**
+     * Removes a named area. Its chunks stay loaded where something else still keeps them.
+     *
+     * @return the removed area and how many of its chunks are no longer loaded, or empty if there is no such area
+     */
+    public synchronized Optional<AreaRelease> releaseArea(String name) {
+        Optional<NamedArea> area = store.removeArea(name);
+        if (area.isEmpty()) {
+            return Optional.empty();
+        }
+        List<KeptChunk> nowUnloaded = area.get().chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
+        loader.release(nowUnloaded);
+        store.save();
+        return Optional.of(new AreaRelease(area.get(), nowUnloaded.size()));
+    }
+
+    /** @return false if the new name is taken or the old one does not exist */
+    public synchronized boolean renameArea(String oldName, String newName) {
+        Optional<NamedArea> area = store.area(oldName);
+        if (area.isEmpty() || store.area(newName).isPresent()) {
+            return false;
+        }
+        store.removeArea(oldName);
+        NamedArea old = area.get();
+        store.addArea(new NamedArea(newName, old.world(), old.chunks(), old.source()));
+        store.save();
+        return true;
+    }
+
+    /** Releases every single chunk and every named area. @return how many single chunks and areas there were */
+    public synchronized ReleaseAll releaseAll() {
+        Set<KeptChunk> kept = store.allKept();
+        int singles = store.size();
+        int areas = store.areas().size();
+        for (KeptChunk chunk : store.all()) {
+            store.remove(chunk);
+        }
+        for (NamedArea area : store.areas()) {
+            store.removeArea(area.name());
+        }
+        loader.release(kept);
+        store.save();
+        return new ReleaseAll(singles, areas);
+    }
+
+    public record AreaRelease(NamedArea area, int unloaded) {
+    }
+
+    public record ReleaseAll(int chunks, int areas) {
     }
 }
