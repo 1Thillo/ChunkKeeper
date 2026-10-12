@@ -1,11 +1,14 @@
 package de.thillo.chunkkeeper.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import org.bukkit.command.CommandSender;
 
+import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Keeper;
 import de.thillo.chunkkeeper.KeptChunk;
@@ -13,12 +16,14 @@ import de.thillo.chunkkeeper.Messages;
 import de.thillo.chunkkeeper.NamedArea;
 
 /**
- * {@code area}: lists and manages named areas. They are created with {@code keepregion ... --name}
- * or {@code keeprail ... --name}.
+ * {@code area}: lists and manages named areas. They are created with {@code keepregion ... --name},
+ * {@code keeprail ... --name} or {@code area convert}, which groups existing single chunks.
  */
 final class AreaCommand implements Subcommand {
 
-    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename");
+    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "convert", "dissolve");
+    private static final String CONVERT_USAGE =
+            "convert <name> (coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world> | world <world>)";
 
     private final ChunkKeeper plugin;
 
@@ -33,7 +38,7 @@ final class AreaCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return "(list | info <name> | release <name> | rename <name> <new name>)";
+        return "(list | info <name> | release <name> | rename <name> <new name> | " + CONVERT_USAGE + " | dissolve <name>)";
     }
 
     @Override
@@ -65,6 +70,20 @@ final class AreaCommand implements Subcommand {
                     rename(sender, args[1].toLowerCase(), args[2].toLowerCase());
                 } else {
                     Arguments.sendUsage(sender, name(), "rename <name> <new name>");
+                }
+            }
+            case "convert" -> {
+                if (args.length >= 3) {
+                    convert(sender, args[1].toLowerCase(), Arrays.copyOfRange(args, 2, args.length));
+                } else {
+                    Arguments.sendUsage(sender, name(), CONVERT_USAGE);
+                }
+            }
+            case "dissolve" -> {
+                if (args.length == 2) {
+                    dissolve(sender, args[1].toLowerCase());
+                } else {
+                    Arguments.sendUsage(sender, name(), "dissolve <name>");
                 }
             }
             default -> Arguments.sendUsage(sender, name(), usage());
@@ -133,6 +152,60 @@ final class AreaCommand implements Subcommand {
         }
     }
 
+    /**
+     * Moves the single chunks inside a selection into a new named area, e.g. to group chunks that
+     * were imported from KeepChunks. Nothing is unloaded on the way.
+     */
+    private void convert(CommandSender sender, String areaName, String[] selectionArgs) {
+        if (!NamedArea.isValidName(areaName)) {
+            sender.sendMessage(Messages.error("'" + areaName + "' is not a valid area name. Use up to 32 letters, digits, - and _."));
+            return;
+        }
+        if (plugin.store().area(areaName).isPresent()) {
+            sender.sendMessage(Messages.error("There is already an area called '" + areaName + "'. Choose another name."));
+            return;
+        }
+        Optional<Area> selection = selection(sender, selectionArgs);
+        if (selection.isEmpty()) {
+            return;
+        }
+        Optional<Integer> moved = plugin.keeper().convertToArea(areaName, selection.get().world(),
+                selection.get().chunks(), selection.get().description());
+        if (moved.isEmpty()) {
+            sender.sendMessage(Messages.error("There is already an area called '" + areaName + "'. Choose another name."));
+        } else if (moved.get() == 0) {
+            sender.sendMessage(Messages.error("There are no single chunks in " + selection.get().description()
+                    + ", so there is nothing to convert. No area was created."));
+        } else {
+            sender.sendMessage(Messages.success("Converted " + moved.get() + " single chunks from " + selection.get().description()
+                    + " into area '" + areaName + "'. They stayed loaded the whole time."));
+        }
+    }
+
+    /** {@code world <world>} takes every single chunk of a world, the other modes work like keepregion. */
+    private Optional<Area> selection(CommandSender sender, String[] args) {
+        if (args.length >= 1 && args[0].equalsIgnoreCase("world")) {
+            if (args.length != 2) {
+                Arguments.sendUsage(sender, name(), CONVERT_USAGE);
+                return Optional.empty();
+            }
+            String world = args[1];
+            return Optional.of(new Area(world, plugin.store().inWorld(world), "all single chunks in '" + world + "'"));
+        }
+        return Arguments.area(plugin, sender, args, name() + " convert <name>");
+    }
+
+    private void dissolve(CommandSender sender, String areaName) {
+        Optional<NamedArea> area = plugin.store().area(areaName);
+        Optional<Integer> added = plugin.keeper().dissolveArea(areaName);
+        if (added.isEmpty() || area.isEmpty()) {
+            sender.sendMessage(Messages.error("There is no area called '" + areaName + "'. See /chunkkeeper area list."));
+            return;
+        }
+        sender.sendMessage(Messages.success("Dissolved area '" + areaName + "': its " + area.get().chunks().size()
+                + " chunks are now kept on their own (" + added.get() + " of them were not before). Nothing was unloaded."));
+    }
+
     private Optional<NamedArea> find(CommandSender sender, String areaName) {
         Optional<NamedArea> area = plugin.store().area(areaName);
         if (area.isEmpty()) {
@@ -141,12 +214,31 @@ final class AreaCommand implements Subcommand {
         return area;
     }
 
+    private List<String> convertSuggestions(CommandSender sender, String[] args) {
+        if (args.length == 2) {
+            return List.of("<name>");
+        }
+        String[] selection = Arrays.copyOfRange(args, 2, args.length);
+        if (selection.length == 1) {
+            List<String> modes = new ArrayList<>(Arguments.areaSuggestions(plugin, sender, selection));
+            modes.add("world");
+            return modes;
+        }
+        if (selection[0].equalsIgnoreCase("world")) {
+            return selection.length == 2 ? List.copyOf(plugin.store().worlds()) : List.of();
+        }
+        return Arguments.areaSuggestions(plugin, sender, selection);
+    }
+
     @Override
     public List<String> suggest(CommandSender sender, String[] args) {
         if (args.length == 1) {
             return ACTIONS;
         }
         String action = args[0].toLowerCase();
+        if (action.equals("convert")) {
+            return convertSuggestions(sender, args);
+        }
         if (args.length == 2 && !action.equals("list")) {
             return plugin.store().areas().stream().map(NamedArea::name).toList();
         }
