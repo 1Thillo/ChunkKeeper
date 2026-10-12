@@ -29,3 +29,11 @@ Created area 'line' with 21 chunks
 Created area 'overlap' with 4 chunks
 4 of its chunks stay loaded because they are kept on their own or by other areas.
 Released area 'overlap' (4 chunks).
+Converted 4 single chunks from chunks (40, 40) to (42, 42) in 'world' into area 'block'
+Named areas: block
+There is already an area called 'block'
+so there is nothing to convert. No area was created.
+Dissolved area 'block': its 4 chunks are now kept on their own (4 of them were not before)
+Released 4 of the 4 chunks
+Converted 2 single chunks from all single chunks in 'world' into area 'imported'
+Dissolved area 'imported': its 2 chunks are now kept on their own

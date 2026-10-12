@@ -35,6 +35,17 @@ wait 3
 chk keepregion coords 61 61 62 62 world --name overlap
 chk area release line
 chk area release overlap
+# Convert single chunks into an area and back, without unloading anything
+chk keepregion coords 40 40 41 41 world
+chk area convert block coords 40 40 42 42 world
+chk chunkinfo coords 40 40 world
+chk area convert block coords 40 40 42 42 world
+chk area convert nothing coords 50 50 51 51 world
+chk area dissolve block
+chk chunkinfo coords 41 41 world
+chk releaseregion coords 40 40 41 41 world
+chk area convert imported world world
+chk area dissolve imported
 chk reload
 chk releaseall confirm
 chk list
