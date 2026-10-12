@@ -1,0 +1,9 @@
+# Only the forms above can be used to open an issue, so every report brings the basics along.
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/1Thillo/ChunkKeeper/security/advisories/new
+    about: Please report vulnerabilities privately instead of opening a public issue.
+  - name: Documentation
+    url: https://github.com/1Thillo/ChunkKeeper#readme
+    about: All commands, permissions and configuration options are described in the README.
