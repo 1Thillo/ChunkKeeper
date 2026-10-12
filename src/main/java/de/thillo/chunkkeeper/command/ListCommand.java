@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.NamedArea;
 
 /**
  * {@code list}: how many chunks are kept per world, or with a world name the chunks themselves,
@@ -59,15 +60,24 @@ final class ListCommand implements Subcommand {
     }
 
     private void listWorlds(CommandSender sender) {
-        if (plugin.store().size() == 0) {
+        List<NamedArea> areas = plugin.store().areas();
+        if (plugin.store().size() == 0 && areas.isEmpty()) {
             sender.sendMessage(Messages.info("No chunks are kept loaded."));
             return;
         }
-        sender.sendMessage(Messages.info(plugin.store().size() + " chunks are kept loaded:"));
-        for (String world : plugin.store().worlds()) {
-            sender.sendMessage(Messages.field(world, plugin.store().inWorld(world).size() + " chunks"));
+        if (plugin.store().size() > 0) {
+            sender.sendMessage(Messages.info(plugin.store().size() + " chunks are kept loaded:"));
+            for (String world : plugin.store().worlds()) {
+                sender.sendMessage(Messages.field(world, plugin.store().inWorld(world).size() + " chunks"));
+            }
+            sender.sendMessage(Messages.info("Details: /chunkkeeper list <world> [page]"));
         }
-        sender.sendMessage(Messages.info("Details: /chunkkeeper list <world> [page]"));
+        if (!areas.isEmpty()) {
+            sender.sendMessage(Messages.info(areas.size() + " named areas:"));
+            for (NamedArea area : areas) {
+                sender.sendMessage(Messages.field(area.name(), area.chunks().size() + " chunks in '" + area.world() + "'"));
+            }
+        }
     }
 
     private void listChunks(CommandSender sender, String world, int page) {
@@ -75,7 +85,7 @@ final class ListCommand implements Subcommand {
                 .sorted(Comparator.comparingInt(KeptChunk::x).thenComparingInt(KeptChunk::z))
                 .toList();
         if (chunks.isEmpty()) {
-            sender.sendMessage(Messages.error("No chunks are kept in world '" + world + "'."));
+            sender.sendMessage(Messages.error("No single chunks are kept in world '" + world + "'. Named areas: /chunkkeeper area list"));
             return;
         }
         int pages = (chunks.size() + PAGE_SIZE - 1) / PAGE_SIZE;

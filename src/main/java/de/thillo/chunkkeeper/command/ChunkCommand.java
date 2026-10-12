@@ -46,15 +46,23 @@ final class ChunkCommand implements Subcommand {
         }
         if (keep) {
             if (plugin.keeper().keep(List.of(chunk.get())) == 0) {
-                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " is already kept loaded."));
+                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " is already kept on its own."));
             } else {
                 sender.sendMessage(Messages.success("Keeping chunk " + chunk.get().describe() + " loaded."));
             }
         } else {
-            if (plugin.keeper().release(List.of(chunk.get())) == 0) {
+            boolean released = plugin.keeper().release(List.of(chunk.get())) > 0;
+            List<String> areas = plugin.store().areasContaining(chunk.get());
+            if (released) {
+                sender.sendMessage(Messages.success("Released chunk " + chunk.get().describe() + "."));
+            } else if (areas.isEmpty()) {
                 sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " was not kept loaded."));
             } else {
-                sender.sendMessage(Messages.success("Released chunk " + chunk.get().describe() + "."));
+                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " is not kept on its own."));
+            }
+            if (!areas.isEmpty()) {
+                sender.sendMessage(Messages.info("It stays loaded through the named area(s) " + String.join(", ", areas)
+                        + ". Use /chunkkeeper area release <name> to release an area."));
             }
         }
     }
