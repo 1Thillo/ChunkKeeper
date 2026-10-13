@@ -21,7 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 final class MessageFiles {
 
-    static final List<String> BUILT_IN = List.of("en");
+    static final List<String> BUILT_IN = List.of("en", "de");
 
     private MessageFiles() {
     }

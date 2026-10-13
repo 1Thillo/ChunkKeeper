@@ -38,7 +38,19 @@ class TranslationsTest {
         return names;
     }
 
+    @Test
+    void germanHasExactlyTheEnglishKeys() throws IOException {
+        assertEquals(new TreeSet<>(builtIn("en").keySet()), new TreeSet<>(builtIn("de").keySet()));
+    }
 
+    @Test
+    void germanUsesTheSamePlaceholders() throws IOException {
+        Map<String, String> english = builtIn("en");
+        Map<String, String> german = builtIn("de");
+        for (String key : english.keySet()) {
+            assertEquals(placeholders(english.get(key)), placeholders(german.get(key)), "placeholders of " + key);
+        }
+    }
 
     /** Catches typos: every key that the code asks for has to exist in the English file. */
     @Test
