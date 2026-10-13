@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Origin;
 import de.thillo.chunkkeeper.NamedArea;
 
 /**
@@ -63,7 +64,8 @@ final class RegionCommand implements Subcommand {
     }
 
     private void createNamedArea(CommandSender sender, String name, Area area) {
-        NamedArea namedArea = new NamedArea(name, area.world(), Set.copyOf(area.chunks()), Messages.stored(area.description()));
+        NamedArea namedArea = new NamedArea(name, area.world(), Set.copyOf(area.chunks()), Messages.stored(area.description()),
+                Origin.now(sender.getName()));
         Optional<Integer> newlyLoaded = plugin.keeper().createArea(namedArea);
         if (newlyLoaded.isEmpty()) {
             Messages.error(sender, "general.area-exists", "name", name);
@@ -71,17 +73,24 @@ final class RegionCommand implements Subcommand {
         }
         Messages.success(sender, "region.area-created", "name", name, "count", namedArea.chunks().size(),
                 "source", area.description(), "new", newlyLoaded.get());
+        plugin.recordChange(sender, "history.area-created", "name", name, "count", namedArea.chunks().size(), "source", area.description());
     }
 
     private void keepSingle(CommandSender sender, Area area) {
         int total = area.chunks().size();
-        int added = plugin.keeper().keep(area.chunks());
+        int added = plugin.keeper().keep(area.chunks(), Origin.now(sender.getName()));
         Messages.success(sender, "region.kept", "added", added, "total", total, "area", area.description(), "already", total - added);
+        if (added > 0) {
+            plugin.recordChange(sender, "history.kept-chunks", "count", added, "area", area.description());
+        }
     }
 
     private void releaseSingle(CommandSender sender, Area area) {
         int removed = plugin.keeper().release(area.chunks());
         Messages.success(sender, "region.released", "removed", removed, "total", area.chunks().size(), "area", area.description());
+        if (removed > 0) {
+            plugin.recordChange(sender, "history.released-chunks", "count", removed, "area", area.description());
+        }
         long stillInAreas = area.chunks().stream().filter(chunk -> plugin.store().isKept(chunk)).count();
         if (stillInAreas > 0) {
             Messages.info(sender, "region.still-in-areas", "count", stillInAreas);

@@ -80,7 +80,9 @@ area:
   label-chunks: "Chunks"
   label-source: "Made from"
   label-span: "Spans chunks"
+  label-created: "Created by"
   span: "({x1}, {z1}) to ({x2}, {z2})"
+  label-created: "Created by"
   released: "Released area '{name}' ({count} chunks)."
   still-kept: "{count} of its chunks stay loaded because they are kept on their own or by other areas."
   renamed: "Renamed area '{old}' to '{new}'."
@@ -96,7 +98,9 @@ info:
   label-blocks: "Blocks"
   blocks: "x {x1} to {x2}, z {z1} to {z2}"
   label-on-its-own: "Kept on its own"
+  label-added: "Added on its own by"
   label-areas: "Named areas"
+  label-added: "Added on its own by"
   label-force-loaded: "Force-loaded"
   label-loaded: "Loaded right now"
   not-force-loaded-yet: "The chunk is kept but not force-loaded yet; this fixes itself within a moment or after /chunkkeeper reload."
@@ -129,6 +133,26 @@ import:
 version:
   plugin: "ChunkKeeper v{version}"
   server: "Server: {platform} {minecraft} ({server})"
+
+origin:
+  known: "{by}, {date}"
+  unknown: "unknown (from before ChunkKeeper 1.2.0)"
+
+# Lines in plugins/ChunkKeeper/history.log and /chunkkeeper history
+history:
+  header: "Changes, newest first (page {page} of {pages}):"
+  empty: "Nothing has been recorded yet."
+  kept-chunk: "kept chunk {chunk}"
+  released-chunk: "released chunk {chunk}"
+  kept-chunks: "kept {count} chunks: {area}"
+  released-chunks: "released {count} chunks: {area}"
+  area-created: "created area '{name}' with {count} chunks from {source}"
+  area-released: "released area '{name}' ({count} chunks)"
+  area-renamed: "renamed area '{old}' to '{new}'"
+  area-converted: "converted {count} single chunks into area '{name}'"
+  area-dissolved: "dissolved area '{name}' ({count} chunks)"
+  released-all: "released all: {chunks} chunks and {areas} named areas"
+  imported: "imported {count} chunks from KeepChunks"
 
 worldedit:
   no-selection: "Select an area with WorldEdit first."

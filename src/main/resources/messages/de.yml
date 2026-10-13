@@ -81,7 +81,9 @@ area:
   label-chunks: "Chunks"
   label-source: "Erstellt aus"
   label-span: "Reicht über die Chunks"
+  label-created: "Angelegt von"
   span: "({x1}, {z1}) bis ({x2}, {z2})"
+  label-created: "Angelegt von"
   released: "Bereich „{name}“ freigegeben ({count} Chunks)."
   still-kept: "{count} seiner Chunks bleiben geladen, weil sie einzeln oder von anderen Bereichen gehalten werden."
   renamed: "Bereich „{old}“ in „{new}“ umbenannt."
@@ -97,7 +99,9 @@ info:
   label-blocks: "Blöcke"
   blocks: "x {x1} bis {x2}, z {z1} bis {z2}"
   label-on-its-own: "Einzeln gehalten"
+  label-added: "Einzeln hinzugefügt von"
   label-areas: "Benannte Bereiche"
+  label-added: "Einzeln hinzugefügt von"
   label-force-loaded: "Dauerhaft geladen (force-loaded)"
   label-loaded: "Gerade geladen"
   not-force-loaded-yet: "Der Chunk wird gehalten, ist aber noch nicht dauerhaft geladen; das erledigt sich gleich von selbst oder nach /chunkkeeper reload."
@@ -130,6 +134,26 @@ import:
 version:
   plugin: "ChunkKeeper v{version}"
   server: "Server: {platform} {minecraft} ({server})"
+
+origin:
+  known: "{by}, {date}"
+  unknown: "unbekannt (aus der Zeit vor ChunkKeeper 1.2.0)"
+
+# Zeilen in plugins/ChunkKeeper/history.log und bei /chunkkeeper history
+history:
+  header: "Änderungen, neueste zuerst (Seite {page} von {pages}):"
+  empty: "Bisher wurde nichts aufgezeichnet."
+  kept-chunk: "Chunk {chunk} gehalten"
+  released-chunk: "Chunk {chunk} freigegeben"
+  kept-chunks: "{count} Chunks gehalten: {area}"
+  released-chunks: "{count} Chunks freigegeben: {area}"
+  area-created: "Bereich „{name}“ mit {count} Chunks angelegt aus {source}"
+  area-released: "Bereich „{name}“ freigegeben ({count} Chunks)"
+  area-renamed: "Bereich „{old}“ in „{new}“ umbenannt"
+  area-converted: "{count} Einzelchunks in den Bereich „{name}“ übernommen"
+  area-dissolved: "Bereich „{name}“ aufgelöst ({count} Chunks)"
+  released-all: "alles freigegeben: {chunks} Chunks und {areas} benannte Bereiche"
+  imported: "{count} Chunks aus KeepChunks übernommen"
 
 worldedit:
   no-selection: "Wähle zuerst mit WorldEdit einen Bereich aus."

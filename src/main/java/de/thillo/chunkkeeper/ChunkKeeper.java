@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,6 +26,7 @@ public final class ChunkKeeper extends JavaPlugin {
     private Keeper keeper;
     private KeepChunksImporter importer;
     private Hooks hooks;
+    private History history;
 
     @Override
     public void onEnable() {
@@ -36,6 +38,7 @@ public final class ChunkKeeper extends JavaPlugin {
         permissions = new Permissions(this);
         importer = new KeepChunksImporter(getDataFolder().getParentFile());
         hooks = new Hooks();
+        history = new History(new File(getDataFolder(), "history.log").toPath(), getLogger());
 
         // No chunks.yml yet means this is the first start: take over what KeepChunks had.
         Optional<KeepChunksImporter.Result> imported = store.fileExists() ? Optional.empty() : importer.read();
@@ -77,7 +80,8 @@ public final class ChunkKeeper extends JavaPlugin {
     }
 
     private void finishImport(KeepChunksImporter.Result result) {
-        int added = keeper.keep(result.chunks());
+        int added = keeper.keep(result.chunks(), Origin.now("KeepChunks import"));
+        history.record("KeepChunks import", Messages.stored(Text.of("history.imported", "count", added)));
         getLogger().info("First start: imported " + added + " chunks from " + importer.dataFile().getPath() + ".");
         if (!result.unreadable().isEmpty()) {
             getLogger().warning("Could not read these KeepChunks entries: " + result.unreadable());
@@ -153,5 +157,14 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public Hooks hooks() {
         return hooks;
+    }
+
+    public History history() {
+        return history;
+    }
+
+    /** Writes a change to history.log, in the console language, with the sender as the person who made it. */
+    public void recordChange(CommandSender who, String key, Object... placeholders) {
+        history.record(who.getName(), Messages.stored(Text.of(key, placeholders)));
     }
 }
