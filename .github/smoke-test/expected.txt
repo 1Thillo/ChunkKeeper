@@ -44,5 +44,5 @@ backups, newest first:
 There is no backup called 'nope'
 Saved a backup first:
 Changes, newest first
-| CONSOLE | renamed area 'testarea' to 'farm'
-| KeepChunks import | imported 2 chunks from KeepChunks
+| CONSOLE | released all: 2 chunks and 1 named areas
+| CONSOLE | made backup
