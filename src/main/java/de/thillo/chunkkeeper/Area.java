@@ -5,9 +5,9 @@ import java.util.List;
 
 /**
  * A group of chunks in one world, for example everything between two corners or inside a
- * WorldGuard region. {@code description} is used in chat messages.
+ * WorldGuard region. {@code description} says in chat messages where the chunks come from.
  */
-public record Area(String world, List<KeptChunk> chunks, String description) {
+public record Area(String world, List<KeptChunk> chunks, Text description) {
 
     /** Every chunk in the rectangle between two chunk corners, in any order. */
     public static Area rectangle(String world, int x1, int z1, int x2, int z2) {
@@ -21,7 +21,7 @@ public record Area(String world, List<KeptChunk> chunks, String description) {
                 chunks.add(new KeptChunk(world, x, z));
             }
         }
-        return new Area(world, chunks, "chunks (" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ") in '" + world + "'");
+        return new Area(world, chunks, Text.of("describe.rectangle", "x1", minX, "z1", minZ, "x2", maxX, "z2", maxZ, "world", world));
     }
 
     /** How many chunks the rectangle would contain, without building the list. */

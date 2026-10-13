@@ -33,10 +33,6 @@ final class ChunkCommand implements Subcommand {
         return Arguments.CHUNK_USAGE;
     }
 
-    @Override
-    public String description() {
-        return keep ? "Keep one chunk loaded." : "Stop keeping one chunk loaded.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -46,23 +42,22 @@ final class ChunkCommand implements Subcommand {
         }
         if (keep) {
             if (plugin.keeper().keep(List.of(chunk.get())) == 0) {
-                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " is already kept on its own."));
+                Messages.error(sender, "chunk.already-kept", "chunk", chunk.get().describe());
             } else {
-                sender.sendMessage(Messages.success("Keeping chunk " + chunk.get().describe() + " loaded."));
+                Messages.success(sender, "chunk.kept", "chunk", chunk.get().describe());
             }
         } else {
             boolean released = plugin.keeper().release(List.of(chunk.get())) > 0;
             List<String> areas = plugin.store().areasContaining(chunk.get());
             if (released) {
-                sender.sendMessage(Messages.success("Released chunk " + chunk.get().describe() + "."));
+                Messages.success(sender, "chunk.released", "chunk", chunk.get().describe());
             } else if (areas.isEmpty()) {
-                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " was not kept loaded."));
+                Messages.error(sender, "chunk.not-kept", "chunk", chunk.get().describe());
             } else {
-                sender.sendMessage(Messages.error("Chunk " + chunk.get().describe() + " is not kept on its own."));
+                Messages.error(sender, "chunk.not-kept-on-its-own", "chunk", chunk.get().describe());
             }
             if (!areas.isEmpty()) {
-                sender.sendMessage(Messages.info("It stays loaded through the named area(s) " + String.join(", ", areas)
-                        + ". Use /chunkkeeper area release <name> to release an area."));
+                Messages.info(sender, "chunk.stays-through-areas", "areas", String.join(", ", areas));
             }
         }
     }

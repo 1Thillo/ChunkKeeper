@@ -12,8 +12,6 @@ interface Subcommand {
     /** The arguments after the name, shown in /chunkkeeper help, e.g. {@code (current | coords <x> <z> <world>)}. */
     String usage();
 
-    String description();
-
     /** @param args the arguments after the subcommand name */
     void execute(CommandSender sender, String[] args);
 

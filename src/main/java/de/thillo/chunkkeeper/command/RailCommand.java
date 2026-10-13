@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
 import de.thillo.chunkkeeper.NamedArea;
+import de.thillo.chunkkeeper.Text;
 import de.thillo.chunkkeeper.rail.RailTracer;
 
 /**
@@ -38,10 +39,6 @@ final class RailCommand implements Subcommand {
         return keep ? "(current | coords <x> <y> <z> <world>) [--name <name>]" : "(current | coords <x> <y> <z> <world>)";
     }
 
-    @Override
-    public String description() {
-        return keep ? "Keep the chunks along a railway loaded." : "Stop keeping the chunks along a railway loaded.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -50,12 +47,12 @@ final class RailCommand implements Subcommand {
             return;
         }
         if (!keep && named.get().name().isPresent()) {
-            sender.sendMessage(Messages.error("To release a named area, use /chunkkeeper area release <name>."));
+            Messages.error(sender, "general.use-area-release");
             return;
         }
         Optional<String> areaName = named.get().name();
         if (areaName.isPresent() && plugin.store().area(areaName.get()).isPresent()) {
-            sender.sendMessage(Messages.error("There is already an area called '" + areaName.get() + "'. Release it first or choose another name."));
+            Messages.error(sender, "general.area-exists", "name", areaName.get());
             return;
         }
         Optional<Location> start = startPosition(sender, named.get().rest());
@@ -64,38 +61,34 @@ final class RailCommand implements Subcommand {
         }
         Location at = start.get();
         World world = at.getWorld();
-        sender.sendMessage(Messages.info("Following the rails from " + at.getBlockX() + ", " + at.getBlockY() + ", "
-                + at.getBlockZ() + " in '" + world.getName() + "'..."));
+        Messages.info(sender, "rail.following", "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(), "world", world.getName());
 
         new RailTracer(plugin, world, plugin.settings().railSearchLimit(), result -> {
             if (!result.startFound()) {
-                sender.sendMessage(Messages.error("There is no rail at that position. Stand on the track or give its coordinates."));
+                Messages.error(sender, "rail.no-rail");
                 return;
             }
             if (result.limitHit()) {
-                sender.sendMessage(Messages.error("Stopped after " + result.rails()
-                        + " rails (rail-search-limit in config.yml). Only the part found so far is used."));
+                Messages.error(sender, "rail.limit-hit", "rails", result.rails());
             }
             int total = result.chunks().size();
             if (areaName.isPresent()) {
-                String description = "the railway from " + at.getBlockX() + ", " + at.getBlockY() + ", " + at.getBlockZ()
-                        + " in '" + world.getName() + "'";
+                String description = Messages.stored(Text.of("describe.railway",
+                        "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(), "world", world.getName()));
                 Optional<Integer> newlyLoaded = plugin.keeper().createArea(
                         new NamedArea(areaName.get(), world.getName(), result.chunks(), description));
                 if (newlyLoaded.isEmpty()) {
-                    sender.sendMessage(Messages.error("There is already an area called '" + areaName.get() + "'."));
+                    Messages.error(sender, "general.area-exists-short", "name", areaName.get());
                 } else {
-                    sender.sendMessage(Messages.success("Found " + result.rails() + " rails. Created area '" + areaName.get()
-                            + "' with " + total + " chunks (" + newlyLoaded.get() + " of them were not kept before)."));
+                    Messages.success(sender, "rail.area-created", "rails", result.rails(), "name", areaName.get(),
+                            "count", total, "new", newlyLoaded.get());
                 }
             } else if (keep) {
                 int added = plugin.keeper().keep(result.chunks());
-                sender.sendMessage(Messages.success("Found " + result.rails() + " rails. Keeping " + added + " more chunks loaded ("
-                        + total + " along the track, " + (total - added) + " were kept already)."));
+                Messages.success(sender, "rail.kept", "rails", result.rails(), "added", added, "total", total, "already", total - added);
             } else {
                 int removed = plugin.keeper().release(result.chunks());
-                sender.sendMessage(Messages.success("Found " + result.rails() + " rails. Released " + removed + " of the "
-                        + total + " chunks along the track."));
+                Messages.success(sender, "rail.released", "rails", result.rails(), "removed", removed, "total", total);
             }
         }).start(at.getBlockX(), at.getBlockY(), at.getBlockZ());
     }

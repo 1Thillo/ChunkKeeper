@@ -25,16 +25,12 @@ final class VersionCommand implements Subcommand {
         return "";
     }
 
-    @Override
-    public String description() {
-        return "Show the plugin and server version.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         String platform = isFolia() ? "Folia" : Bukkit.getName();
-        sender.sendMessage(Messages.success("ChunkKeeper v" + plugin.getPluginMeta().getVersion()));
-        sender.sendMessage(Messages.info("Server: " + platform + " " + Bukkit.getMinecraftVersion() + " (" + Bukkit.getVersion() + ")"));
+        Messages.success(sender, "version.plugin", "version", plugin.getPluginMeta().getVersion());
+        Messages.info(sender, "version.server", "platform", platform, "minecraft", Bukkit.getMinecraftVersion(), "server", Bukkit.getVersion());
     }
 
     private static boolean isFolia() {

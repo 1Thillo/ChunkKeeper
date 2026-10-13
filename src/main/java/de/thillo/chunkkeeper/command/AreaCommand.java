@@ -14,6 +14,7 @@ import de.thillo.chunkkeeper.Keeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
 import de.thillo.chunkkeeper.NamedArea;
+import de.thillo.chunkkeeper.Text;
 
 /**
  * {@code area}: lists and manages named areas. They are created with {@code keepregion ... --name},
@@ -41,10 +42,6 @@ final class AreaCommand implements Subcommand {
         return "(list | info <name> | release <name> | rename <name> <new name> | " + CONVERT_USAGE + " | dissolve <name>)";
     }
 
-    @Override
-    public String description() {
-        return "Manage named areas.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -93,12 +90,12 @@ final class AreaCommand implements Subcommand {
     private void list(CommandSender sender) {
         List<NamedArea> areas = plugin.store().areas();
         if (areas.isEmpty()) {
-            sender.sendMessage(Messages.info("There are no named areas. Create one with /chunkkeeper keepregion ... --name <name>."));
+            Messages.info(sender, "area.none");
             return;
         }
-        sender.sendMessage(Messages.info(areas.size() + " named areas:"));
+        Messages.info(sender, "area.list-header", "count", areas.size());
         for (NamedArea area : areas) {
-            sender.sendMessage(Messages.field(area.name(), area.chunks().size() + " chunks in '" + area.world() + "'"));
+            Messages.namedField(sender, area.name(), Text.of("area.list-entry", "count", area.chunks().size(), "world", area.world()));
         }
     }
 
@@ -108,11 +105,11 @@ final class AreaCommand implements Subcommand {
             return;
         }
         NamedArea area = found.get();
-        sender.sendMessage(Messages.info("Area '" + area.name() + "'"));
-        sender.sendMessage(Messages.field("World", area.world()));
-        sender.sendMessage(Messages.field("Chunks", String.valueOf(area.chunks().size())));
+        Messages.info(sender, "area.info-header", "name", area.name());
+        Messages.field(sender, "area.label-world", area.world());
+        Messages.field(sender, "area.label-chunks", area.chunks().size());
         if (!area.source().isEmpty()) {
-            sender.sendMessage(Messages.field("Made from", area.source()));
+            Messages.field(sender, "area.label-source", area.source());
         }
         Comparator<KeptChunk> byX = Comparator.comparingInt(KeptChunk::x);
         int minX = area.chunks().stream().min(byX).map(KeptChunk::x).orElse(0);
@@ -120,35 +117,35 @@ final class AreaCommand implements Subcommand {
         Comparator<KeptChunk> byZ = Comparator.comparingInt(KeptChunk::z);
         int minZ = area.chunks().stream().min(byZ).map(KeptChunk::z).orElse(0);
         int maxZ = area.chunks().stream().max(byZ).map(KeptChunk::z).orElse(0);
-        sender.sendMessage(Messages.field("Spans chunks", "(" + minX + ", " + minZ + ") to (" + maxX + ", " + maxZ + ")"));
+        Messages.field(sender, "area.label-span", Text.of("area.span", "x1", minX, "z1", minZ, "x2", maxX, "z2", maxZ));
     }
 
     private void release(CommandSender sender, String areaName) {
         Optional<Keeper.AreaRelease> released = plugin.keeper().releaseArea(areaName);
         if (released.isEmpty()) {
-            sender.sendMessage(Messages.error("There is no area called '" + areaName + "'. See /chunkkeeper area list."));
+            Messages.error(sender, "general.area-unknown", "name", areaName);
             return;
         }
         NamedArea area = released.get().area();
         int stillKept = area.chunks().size() - released.get().unloaded();
-        sender.sendMessage(Messages.success("Released area '" + area.name() + "' (" + area.chunks().size() + " chunks)."));
+        Messages.success(sender, "area.released", "name", area.name(), "count", area.chunks().size());
         if (stillKept > 0) {
-            sender.sendMessage(Messages.info(stillKept + " of its chunks stay loaded because they are kept on their own or by other areas."));
+            Messages.info(sender, "area.still-kept", "count", stillKept);
         }
     }
 
     private void rename(CommandSender sender, String oldName, String newName) {
         if (!NamedArea.isValidName(newName)) {
-            sender.sendMessage(Messages.error("'" + newName + "' is not a valid area name. Use up to 32 letters, digits, - and _."));
+            Messages.error(sender, "general.invalid-name", "name", newName);
             return;
         }
         if (find(sender, oldName).isEmpty()) {
             return;
         }
         if (plugin.keeper().renameArea(oldName, newName)) {
-            sender.sendMessage(Messages.success("Renamed area '" + oldName + "' to '" + newName + "'."));
+            Messages.success(sender, "area.renamed", "old", oldName, "new", newName);
         } else {
-            sender.sendMessage(Messages.error("There is already an area called '" + newName + "'."));
+            Messages.error(sender, "general.area-exists-short", "name", newName);
         }
     }
 
@@ -158,11 +155,11 @@ final class AreaCommand implements Subcommand {
      */
     private void convert(CommandSender sender, String areaName, String[] selectionArgs) {
         if (!NamedArea.isValidName(areaName)) {
-            sender.sendMessage(Messages.error("'" + areaName + "' is not a valid area name. Use up to 32 letters, digits, - and _."));
+            Messages.error(sender, "general.invalid-name", "name", areaName);
             return;
         }
         if (plugin.store().area(areaName).isPresent()) {
-            sender.sendMessage(Messages.error("There is already an area called '" + areaName + "'. Choose another name."));
+            Messages.error(sender, "general.area-exists-other-name", "name", areaName);
             return;
         }
         Optional<Area> selection = selection(sender, selectionArgs);
@@ -170,15 +167,13 @@ final class AreaCommand implements Subcommand {
             return;
         }
         Optional<Integer> moved = plugin.keeper().convertToArea(areaName, selection.get().world(),
-                selection.get().chunks(), selection.get().description());
+                selection.get().chunks(), Messages.stored(selection.get().description()));
         if (moved.isEmpty()) {
-            sender.sendMessage(Messages.error("There is already an area called '" + areaName + "'. Choose another name."));
+            Messages.error(sender, "general.area-exists-other-name", "name", areaName);
         } else if (moved.get() == 0) {
-            sender.sendMessage(Messages.error("There are no single chunks in " + selection.get().description()
-                    + ", so there is nothing to convert. No area was created."));
+            Messages.error(sender, "area.nothing-to-convert", "selection", selection.get().description());
         } else {
-            sender.sendMessage(Messages.success("Converted " + moved.get() + " single chunks from " + selection.get().description()
-                    + " into area '" + areaName + "'. They stayed loaded the whole time."));
+            Messages.success(sender, "area.converted", "count", moved.get(), "selection", selection.get().description(), "name", areaName);
         }
     }
 
@@ -190,7 +185,7 @@ final class AreaCommand implements Subcommand {
                 return Optional.empty();
             }
             String world = args[1];
-            return Optional.of(new Area(world, plugin.store().inWorld(world), "all single chunks in '" + world + "'"));
+            return Optional.of(new Area(world, plugin.store().inWorld(world), Text.of("describe.world-singles", "world", world)));
         }
         return Arguments.area(plugin, sender, args, name() + " convert <name>");
     }
@@ -199,17 +194,16 @@ final class AreaCommand implements Subcommand {
         Optional<NamedArea> area = plugin.store().area(areaName);
         Optional<Integer> added = plugin.keeper().dissolveArea(areaName);
         if (added.isEmpty() || area.isEmpty()) {
-            sender.sendMessage(Messages.error("There is no area called '" + areaName + "'. See /chunkkeeper area list."));
+            Messages.error(sender, "general.area-unknown", "name", areaName);
             return;
         }
-        sender.sendMessage(Messages.success("Dissolved area '" + areaName + "': its " + area.get().chunks().size()
-                + " chunks are now kept on their own (" + added.get() + " of them were not before). Nothing was unloaded."));
+        Messages.success(sender, "area.dissolved", "name", areaName, "count", area.get().chunks().size(), "added", added.get());
     }
 
     private Optional<NamedArea> find(CommandSender sender, String areaName) {
         Optional<NamedArea> area = plugin.store().area(areaName);
         if (area.isEmpty()) {
-            sender.sendMessage(Messages.error("There is no area called '" + areaName + "'. See /chunkkeeper area list."));
+            Messages.error(sender, "general.area-unknown", "name", areaName);
         }
         return area;
     }

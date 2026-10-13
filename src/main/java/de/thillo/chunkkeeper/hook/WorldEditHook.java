@@ -16,6 +16,7 @@ import com.sk89q.worldedit.regions.Region;
 import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Text;
 
 /**
  * Reads a player's WorldEdit selection. Works with WorldEdit and FastAsyncWorldEdit.
@@ -31,7 +32,7 @@ public final class WorldEditHook {
         try {
             region = session.getSelection(session.getSelectionWorld());
         } catch (IncompleteRegionException e) {
-            player.sendMessage(Messages.error("Select an area with WorldEdit first."));
+            Messages.error(player, "worldedit.no-selection");
             return Optional.empty();
         }
         String world = BukkitAdapter.adapt(region.getWorld()).getName();
@@ -40,6 +41,6 @@ public final class WorldEditHook {
         for (BlockVector2 chunk : region.getChunks()) {
             chunks.add(new KeptChunk(world, chunk.x(), chunk.z()));
         }
-        return Optional.of(new Area(world, chunks, "your WorldEdit selection in '" + world + "'"));
+        return Optional.of(new Area(world, chunks, Text.of("describe.worldedit", "world", world)));
     }
 }
