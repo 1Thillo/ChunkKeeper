@@ -38,11 +38,6 @@ final class RegionCommand implements Subcommand {
         return keep ? Arguments.AREA_USAGE + " [--name <name>]" : Arguments.AREA_USAGE;
     }
 
-    @Override
-    public String description() {
-        return keep ? "Keep all chunks of an area loaded, optionally as a named area."
-                : "Stop keeping the single chunks of an area loaded (named areas: /chunkkeeper area release).";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -51,7 +46,7 @@ final class RegionCommand implements Subcommand {
             return;
         }
         if (!keep && named.get().name().isPresent()) {
-            sender.sendMessage(Messages.error("To release a named area, use /chunkkeeper area release <name>."));
+            Messages.error(sender, "general.use-area-release");
             return;
         }
         Optional<Area> area = Arguments.area(plugin, sender, named.get().rest(), name());
@@ -68,30 +63,28 @@ final class RegionCommand implements Subcommand {
     }
 
     private void createNamedArea(CommandSender sender, String name, Area area) {
-        NamedArea namedArea = new NamedArea(name, area.world(), Set.copyOf(area.chunks()), area.description());
+        NamedArea namedArea = new NamedArea(name, area.world(), Set.copyOf(area.chunks()), Messages.stored(area.description()));
         Optional<Integer> newlyLoaded = plugin.keeper().createArea(namedArea);
         if (newlyLoaded.isEmpty()) {
-            sender.sendMessage(Messages.error("There is already an area called '" + name + "'. Release it first or choose another name."));
+            Messages.error(sender, "general.area-exists", "name", name);
             return;
         }
-        sender.sendMessage(Messages.success("Created area '" + name + "' with " + namedArea.chunks().size() + " chunks from "
-                + area.description() + " (" + newlyLoaded.get() + " of them were not kept before)."));
+        Messages.success(sender, "region.area-created", "name", name, "count", namedArea.chunks().size(),
+                "source", area.description(), "new", newlyLoaded.get());
     }
 
     private void keepSingle(CommandSender sender, Area area) {
         int total = area.chunks().size();
         int added = plugin.keeper().keep(area.chunks());
-        sender.sendMessage(Messages.success("Keeping " + added + " more chunks loaded (" + total + " in "
-                + area.description() + ", " + (total - added) + " were kept already)."));
+        Messages.success(sender, "region.kept", "added", added, "total", total, "area", area.description(), "already", total - added);
     }
 
     private void releaseSingle(CommandSender sender, Area area) {
         int removed = plugin.keeper().release(area.chunks());
-        sender.sendMessage(Messages.success("Released " + removed + " of the " + area.chunks().size() + " chunks in "
-                + area.description() + "."));
+        Messages.success(sender, "region.released", "removed", removed, "total", area.chunks().size(), "area", area.description());
         long stillInAreas = area.chunks().stream().filter(chunk -> plugin.store().isKept(chunk)).count();
         if (stillInAreas > 0) {
-            sender.sendMessage(Messages.info(stillInAreas + " of them stay loaded because they belong to named areas."));
+            Messages.info(sender, "region.still-in-areas", "count", stillInAreas);
         }
     }
 

@@ -12,6 +12,7 @@ import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Text;
 
 /** {@code chunkinfo}: whether a chunk is kept, force-loaded and currently loaded. */
 final class ChunkInfoCommand implements Subcommand {
@@ -32,10 +33,6 @@ final class ChunkInfoCommand implements Subcommand {
         return "(current | coords <x> <z> <world> | coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world>)";
     }
 
-    @Override
-    public String description() {
-        return "Show whether a chunk or an area is kept loaded.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -60,9 +57,9 @@ final class ChunkInfoCommand implements Subcommand {
             return;
         }
         long kept = area.get().chunks().stream().filter(plugin.store()::isKept).count();
-        sender.sendMessage(Messages.info("Area: " + area.get().description()));
-        sender.sendMessage(Messages.field("Chunks in the area", String.valueOf(area.get().chunks().size())));
-        sender.sendMessage(Messages.field("Kept by ChunkKeeper", String.valueOf(kept)));
+        Messages.info(sender, "info.area-header", "area", area.get().description());
+        Messages.field(sender, "info.label-area-chunks", area.get().chunks().size());
+        Messages.field(sender, "info.label-kept", kept);
     }
 
     private void chunkInfo(CommandSender sender, String[] args) {
@@ -78,18 +75,16 @@ final class ChunkInfoCommand implements Subcommand {
         // On Folia the force-load flags may only be read on the global region thread.
         plugin.loader().runGlobal(() -> {
             boolean forceLoaded = world.isChunkForceLoaded(chunk.x(), chunk.z());
-            sender.sendMessage(Messages.info("Chunk " + chunk.describe()));
-            sender.sendMessage(Messages.field("Blocks", "x " + (chunk.x() * 16) + " to " + (chunk.x() * 16 + 15)
-                    + ", z " + (chunk.z() * 16) + " to " + (chunk.z() * 16 + 15)));
-            sender.sendMessage(Messages.yesNo("Kept by ChunkKeeper", kept));
-            sender.sendMessage(Messages.yesNo("Kept on its own", single));
-            sender.sendMessage(Messages.field("Named areas", areas.isEmpty() ? "none" : String.join(", ", areas)));
-            sender.sendMessage(Messages.yesNo("Force-loaded", forceLoaded));
-            sender.sendMessage(Messages.yesNo("Loaded right now", world.isChunkLoaded(chunk.x(), chunk.z())));
+            Messages.info(sender, "info.chunk-header", "chunk", chunk.describe());
+            Messages.field(sender, "info.label-blocks", Text.of("info.blocks",
+                    "x1", chunk.x() * 16, "x2", chunk.x() * 16 + 15, "z1", chunk.z() * 16, "z2", chunk.z() * 16 + 15));
+            Messages.yesNo(sender, "info.label-kept", kept);
+            Messages.yesNo(sender, "info.label-on-its-own", single);
+            Messages.field(sender, "info.label-areas", areas.isEmpty() ? Text.of("general.none") : String.join(", ", areas));
+            Messages.yesNo(sender, "info.label-force-loaded", forceLoaded);
+            Messages.yesNo(sender, "info.label-loaded", world.isChunkLoaded(chunk.x(), chunk.z()));
             if (kept != forceLoaded) {
-                sender.sendMessage(Messages.info(kept
-                        ? "The chunk is kept but not force-loaded yet; this fixes itself within a moment or after /chunkkeeper reload."
-                        : "Something else force-loads this chunk, for example the vanilla /forceload command."));
+                Messages.info(sender, kept ? "info.not-force-loaded-yet" : "info.forced-by-something-else");
             }
         });
     }

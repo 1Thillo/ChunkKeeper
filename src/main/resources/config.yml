@@ -1,5 +1,14 @@
 # ChunkKeeper configuration. Apply changes with /chunkkeeper reload.
 
+# Language of the messages. "auto" gives every player their own Minecraft language, if ChunkKeeper
+# has it (English and German are built in; other languages fall back to English). A language code
+# such as "de" or "en" gives everyone that language. The texts themselves are in
+# plugins/ChunkKeeper/messages/ and can be changed there.
+language: auto
+
+# Language for the server console when language is "auto".
+console-language: en
+
 # Only the server console may run "/chunkkeeper releaseall", so nobody wipes the list by accident.
 release-all-console-only: true
 

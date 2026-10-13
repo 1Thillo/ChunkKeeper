@@ -43,7 +43,7 @@ public record KeptChunk(String world, int x, int z) {
     }
 
     /** Short form for chat messages, for example {@code (12, -5) in 'world'}. */
-    public String describe() {
-        return "(" + x + ", " + z + ") in '" + world + "'";
+    public Text describe() {
+        return Text.of("describe.chunk", "x", x, "z", z, "world", world);
     }
 }

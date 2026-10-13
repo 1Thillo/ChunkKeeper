@@ -63,11 +63,11 @@ public final class ChunkKeeperCommand implements CommandExecutor, TabCompleter {
         }
         Subcommand subcommand = subcommands.get(name);
         if (subcommand == null) {
-            sender.sendMessage(Messages.error("Unknown subcommand '" + args[0] + "'. See /chunkkeeper help."));
+            Messages.error(sender, "general.unknown-subcommand", "subcommand", args[0]);
             return true;
         }
         if (!permissions.has(sender, subcommand.name())) {
-            sender.sendMessage(Messages.error("You don't have permission to do that."));
+            Messages.error(sender, "general.no-permission");
             return true;
         }
         subcommand.execute(sender, Arrays.copyOfRange(args, 1, args.length));
@@ -119,11 +119,11 @@ public final class ChunkKeeperCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(Messages.info("ChunkKeeper commands (aliases /keepchunks, /kc, /ck, /chk):"));
+        Messages.info(sender, "help.header");
         for (Subcommand subcommand : subcommands.values()) {
             if (permissions.has(sender, subcommand.name())) {
                 sender.sendMessage(Component.text("/chunkkeeper " + subcommand.name() + " " + subcommand.usage(), NamedTextColor.WHITE)
-                        .append(Component.text(" - " + subcommand.description(), NamedTextColor.GRAY)));
+                        .append(Component.text(" - " + Messages.text(sender, "help." + subcommand.name()), NamedTextColor.GRAY)));
             }
         }
     }

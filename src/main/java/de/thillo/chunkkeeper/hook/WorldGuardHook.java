@@ -18,6 +18,7 @@ import com.sk89q.worldguard.protection.regions.RegionType;
 import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Text;
 
 /**
  * Looks up WorldGuard regions.
@@ -31,11 +32,11 @@ public final class WorldGuardHook {
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
         ProtectedRegion region = regions == null ? null : regions.getRegion(name);
         if (region == null) {
-            sender.sendMessage(Messages.error("There is no WorldGuard region '" + name + "' in world '" + world.getName() + "'."));
+            Messages.error(sender, "worldguard.unknown-region", "region", name, "world", world.getName());
             return Optional.empty();
         }
         if (region.getType() == RegionType.GLOBAL) {
-            sender.sendMessage(Messages.error("The global region covers the whole world and cannot be kept loaded."));
+            Messages.error(sender, "worldguard.global-region");
             return Optional.empty();
         }
 
@@ -49,7 +50,7 @@ public final class WorldGuardHook {
                 }
             }
         }
-        return Optional.of(new Area(world.getName(), chunks, "WorldGuard region '" + region.getId() + "' in '" + world.getName() + "'"));
+        return Optional.of(new Area(world.getName(), chunks, Text.of("describe.worldguard", "region", region.getId(), "world", world.getName())));
     }
 
     public List<String> regionNames(World world) {
