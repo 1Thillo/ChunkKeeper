@@ -9,6 +9,8 @@ familiar command names and takes over KeepChunks' chunks automatically on its fi
 - Paper and Folia 26.2, Java 25
 - Single chunks, rectangular areas, WorldEdit selections, WorldGuard regions and whole railways
 - Named areas, such as an event area or a railway, that are kept and released as a whole
+- Messages in English and German, chosen per player; every text can be changed
+- Remembers who added what and when, keeps a history of all changes and backs up its data
 - Optional: WorldEdit or FastAsyncWorldEdit, WorldGuard
 
 What changed in each version is listed in the [changelog](CHANGELOG.md).
@@ -61,7 +63,11 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
 | `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
 | `import` | Add the chunks from KeepChunks' `data.yml` again |
-| `reload` | Reload `config.yml` and `chunks.yml` |
+| `history [page]` | Who changed what and when, newest first |
+| `backup list` | The backups of `chunks.yml` and what they hold |
+| `backup create` | Make a backup now |
+| `backup restore <name> [confirm]` | Restore a backup; without `confirm` it only shows what it holds |
+| `reload` | Reload `config.yml`, `chunks.yml` and the messages |
 | `version` | Plugin and server version |
 | `help` | The commands you may use |
 
@@ -87,6 +93,26 @@ all single chunks of the world `event`. Chunks in the selection that are not kep
 
 Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 
+### Who, when and backups
+
+- `chunkinfo` and `area info` show who added a single chunk or created an area, and when.
+- Every change is written to `plugins/ChunkKeeper/history.log` with time, name and what happened,
+  releases included; `/chunkkeeper history` shows it in the game.
+- Before `releaseall`, `import` and restoring a backup, ChunkKeeper copies `chunks.yml` to
+  `plugins/ChunkKeeper/backups/`. An accidental `releaseall` can be undone with
+  `/chunkkeeper backup restore <name> confirm`; the message after `releaseall` names the backup.
+  Restoring makes a backup of the current state first, so it can be undone as well.
+
+## Languages
+
+With `language: auto` every player gets messages in their Minecraft language if ChunkKeeper has
+it, otherwise in English. English and German are built in; the console uses `console-language`.
+`language: de` (or `en`) gives everyone the same language.
+
+The texts are in `plugins/ChunkKeeper/messages/en.yml` and `de.yml`. Change any of them and run
+`/chunkkeeper reload`; words in `{braces}` are filled in by the plugin. For another language, copy
+`en.yml` to e.g. `fr.yml` and translate it; players with a French client then get it.
+
 ## Permissions
 
 Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
@@ -103,9 +129,12 @@ Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
 | `legacy-permissions` | `true` | Also accept the old `keepchunks.<subcommand>` permissions |
 | `rail-search-limit` | `50000` | `keeprail` stops after this many rail blocks |
 | `max-area-chunks` | `10000` | `keepregion`/`releaseregion` refuse larger areas, so a typo cannot force-load millions of chunks |
+| `language` | `auto` | `auto` = each player's Minecraft language, or a fixed language such as `de` or `en` |
+| `console-language` | `en` | Language of the console when `language` is `auto` |
+| `backups-to-keep` | `20` | How many backups of `chunks.yml` are kept |
 
-The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`: single chunks under `chunks`, one
-`x,z,world` line each, and named areas under `areas`.
+The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`: single chunks under `chunks`
+(`x,z,world`, with who added them and when) and named areas under `areas`.
 Edit it only while the server is stopped, or run `/chunkkeeper reload` afterwards.
 
 ## How it works

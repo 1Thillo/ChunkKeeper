@@ -49,6 +49,7 @@ help:
   import: "Add the chunks from KeepChunks' data.yml."
   version: "Show the plugin and server version."
   history: "Show who changed what and when."
+  backup: "List, make and restore backups of chunks.yml."
 
 chunk:
   already-kept: "Chunk {chunk} is already kept on its own."
@@ -152,6 +153,20 @@ history:
   area-dissolved: "dissolved area '{name}' ({count} chunks)"
   released-all: "released all: {chunks} chunks and {areas} named areas"
   imported: "imported {count} chunks from KeepChunks"
+  backup-created: "made backup {name}"
+  backup-restored: "restored backup {name}"
+
+backup:
+  none: "There are no backups yet. They are made before releaseall, import and restore, or with /chunkkeeper backup create."
+  list-header: "{count} backups, newest first:"
+  contents: "{chunks} single chunks, {areas} named areas"
+  nothing-to-save: "There is no chunks.yml to back up yet."
+  created: "Saved backup {name}."
+  automatic: "Saved a backup first: {name} (undo with /chunkkeeper backup restore {name})."
+  unknown: "There is no backup called '{name}'. See /chunkkeeper backup list."
+  confirm-restore: "Backup {name} holds {contents}. Chunks that are not in it will be released. Type /chunkkeeper backup restore {name} confirm to restore it."
+  restored: "Restored {name}. {chunks} single chunks and {areas} named areas are kept loaded. The state before was saved as {previous}."
+  failed: "That did not work: {error}"
 
 worldedit:
   no-selection: "Select an area with WorldEdit first."

@@ -6,11 +6,26 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-13
+
 ### Added
+- German messages. With `language: auto` every player gets their Minecraft language (English and
+  German are built in), the console uses `console-language`. All texts are in
+  `plugins/ChunkKeeper/messages/` and can be changed or translated into more languages.
+- ChunkKeeper remembers who added each single chunk and named area, and when; `chunkinfo` and
+  `area info` show it.
+- `plugins/ChunkKeeper/history.log` records every change, releases included, and
+  `/chunkkeeper history` shows it in the game (permission `chunkkeeper.history`).
+- Automatic backups of `chunks.yml` before `releaseall`, `import` and restoring, plus
+  `/chunkkeeper backup list | create | restore <name> [confirm]` (permission `chunkkeeper.backup`).
+  The newest `backups-to-keep` (20) are kept.
+- New options `language`, `console-language` and `backups-to-keep`; existing config files get them
+  added automatically.
 - Issue forms for bug reports and feature requests.
 - This changelog.
 
 ### Changed
+- `/chunkkeeper reload` also reloads the messages.
 - Release jars are only attached after the smoke test on Paper and Folia passed.
 - The dependency graph sent to GitHub only lists what the plugin jar ships and the Gradle build
   itself, so Dependabot alerts concern ChunkKeeper directly.
@@ -59,7 +74,8 @@ First release, a replacement for the discontinued KeepChunks plugin with Folia s
 - Safety limits `max-area-chunks` and `rail-search-limit`.
 - Paper and Folia 26.2 support.
 
-[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/1Thillo/ChunkKeeper/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/1Thillo/ChunkKeeper/releases/tag/v1.0.0
