@@ -49,6 +49,7 @@ help:
   reload: "config.yml, chunks.yml und die Meldungen neu laden."
   import: "Die Chunks aus der data.yml von KeepChunks übernehmen."
   version: "Plugin- und Serverversion anzeigen."
+  history: "Anzeigen, wer wann was geändert hat."
 
 chunk:
   already-kept: "Chunk {chunk} wird schon einzeln gehalten."

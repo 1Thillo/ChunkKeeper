@@ -48,6 +48,7 @@ help:
   reload: "Reload config.yml, chunks.yml and the messages."
   import: "Add the chunks from KeepChunks' data.yml."
   version: "Show the plugin and server version."
+  history: "Show who changed what and when."
 
 chunk:
   already-kept: "Chunk {chunk} is already kept on its own."
