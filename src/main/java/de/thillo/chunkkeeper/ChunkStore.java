@@ -2,10 +2,13 @@ package de.thillo.chunkkeeper;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +35,8 @@ public final class ChunkStore {
 
     private final File file;
     private final Logger logger;
-    private final Set<KeptChunk> chunks = ConcurrentHashMap.newKeySet();
+    /** single chunks and who added them */
+    private final Map<KeptChunk, Origin> chunks = new ConcurrentHashMap<>();
     private final Map<String, NamedArea> areas = new ConcurrentHashMap<>();
 
     public ChunkStore(File file, Logger logger) {
@@ -48,19 +52,46 @@ public final class ChunkStore {
         chunks.clear();
         areas.clear();
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
-        for (String line : yaml.getStringList(CHUNKS)) {
-            Optional<KeptChunk> chunk = KeptChunk.parse(line, ",");
-            if (chunk.isPresent()) {
-                chunks.add(chunk.get());
-            } else {
-                logger.warning("Skipping unreadable entry in " + file.getName() + ": '" + line + "'");
-            }
+        for (Object entry : yaml.getList(CHUNKS, List.of())) {
+            loadChunk(entry);
         }
         ConfigurationSection section = yaml.getConfigurationSection(AREAS);
         if (section != null) {
             for (String name : section.getKeys(false)) {
                 loadArea(name, section.getConfigurationSection(name));
             }
+        }
+    }
+
+    /**
+     * An entry is either just "x,z,world" (files from before 1.2.0) or a small map with the chunk and
+     * who added it when: {@code {chunk: "x,z,world", by: Thillo, at: "2026-10-13T12:00:00Z"}}.
+     */
+    private void loadChunk(Object entry) {
+        String line;
+        Origin origin = Origin.UNKNOWN;
+        if (entry instanceof Map<?, ?> map) {
+            line = String.valueOf(map.get("chunk"));
+            origin = readOrigin(map.get("by"), map.get("at"));
+        } else {
+            line = String.valueOf(entry);
+        }
+        Optional<KeptChunk> chunk = KeptChunk.parse(line, ",");
+        if (chunk.isPresent()) {
+            chunks.put(chunk.get(), origin);
+        } else {
+            logger.warning("Skipping unreadable entry in " + file.getName() + ": '" + entry + "'");
+        }
+    }
+
+    private static Origin readOrigin(Object by, Object at) {
+        if (by == null || at == null) {
+            return Origin.UNKNOWN;
+        }
+        try {
+            return new Origin(String.valueOf(by), Optional.of(Instant.parse(String.valueOf(at))));
+        } catch (DateTimeParseException e) {
+            return new Origin(String.valueOf(by), Optional.empty());
         }
     }
 
@@ -80,7 +111,8 @@ public final class ChunkStore {
                 logger.warning("Skipping unreadable chunk '" + line + "' of area '" + name + "' in " + file.getName());
             }
         }
-        areas.put(name, new NamedArea(name, world, areaChunks, section.getString("source", "")));
+        Origin origin = readOrigin(section.get("by"), section.get("at"));
+        areas.put(name, new NamedArea(name, world, areaChunks, section.getString("source", ""), origin));
     }
 
     public synchronized void save() {
@@ -88,14 +120,18 @@ public final class ChunkStore {
         yaml.options().setHeader(List.of(
                 "Chunks kept loaded by ChunkKeeper. Use the /chunkkeeper commands to change them,",
                 "or edit this file while the server is stopped.",
-                "chunks: single chunks, one per line as x,z,world (chunk coordinates)",
+                "chunks: single chunks as x,z,world (chunk coordinates), with who added them and when",
                 "areas:  named areas; their chunks are listed as x,z"));
-        yaml.set(CHUNKS, sortedLines(chunks, true));
+        yaml.set(CHUNKS, singleChunkEntries());
         for (NamedArea area : areas()) {
             String path = AREAS + "." + area.name();
             yaml.set(path + ".world", area.world());
             yaml.set(path + ".source", area.source());
-            yaml.set(path + "." + CHUNKS, sortedLines(area.chunks(), false));
+            if (area.origin().isKnown()) {
+                yaml.set(path + ".by", area.origin().by());
+                yaml.set(path + ".at", area.origin().at().get().toString());
+            }
+            yaml.set(path + "." + CHUNKS, sortedLines(area.chunks()));
         }
         try {
             yaml.save(file);
@@ -104,10 +140,29 @@ public final class ChunkStore {
         }
     }
 
-    private static List<String> sortedLines(Collection<KeptChunk> chunks, boolean withWorld) {
+    private List<Object> singleChunkEntries() {
+        List<KeptChunk> sorted = new ArrayList<>(chunks.keySet());
+        sorted.sort(Comparator.comparing(KeptChunk::serialize));
+        List<Object> entries = new ArrayList<>();
+        for (KeptChunk chunk : sorted) {
+            Origin origin = chunks.getOrDefault(chunk, Origin.UNKNOWN);
+            if (origin.isKnown()) {
+                Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("chunk", chunk.serialize());
+                entry.put("by", origin.by());
+                entry.put("at", origin.at().get().toString());
+                entries.add(entry);
+            } else {
+                entries.add(chunk.serialize());
+            }
+        }
+        return entries;
+    }
+
+    private static List<String> sortedLines(Collection<KeptChunk> chunks) {
         List<String> lines = new ArrayList<>();
         for (KeptChunk chunk : chunks) {
-            lines.add(withWorld ? chunk.serialize() : chunk.x() + "," + chunk.z());
+            lines.add(chunk.x() + "," + chunk.z());
         }
         lines.sort(null);
         return lines;
@@ -117,26 +172,31 @@ public final class ChunkStore {
 
     /** @return true if the chunk is kept on its own (not counting named areas) */
     public boolean contains(KeptChunk chunk) {
-        return chunks.contains(chunk);
+        return chunks.containsKey(chunk);
     }
 
-    /** @return true if the chunk was new */
-    public boolean add(KeptChunk chunk) {
-        return chunks.add(chunk);
+    /** @return true if the chunk was new; a chunk that is kept already keeps its first origin */
+    public boolean add(KeptChunk chunk, Origin origin) {
+        return chunks.putIfAbsent(chunk, origin) == null;
     }
 
     /** @return true if the chunk was in the list */
     public boolean remove(KeptChunk chunk) {
-        return chunks.remove(chunk);
+        return chunks.remove(chunk) != null;
+    }
+
+    /** Who added a single chunk, if it is kept on its own. */
+    public Optional<Origin> origin(KeptChunk chunk) {
+        return Optional.ofNullable(chunks.get(chunk));
     }
 
     /** The chunks kept on their own. */
     public Set<KeptChunk> all() {
-        return Set.copyOf(chunks);
+        return Set.copyOf(chunks.keySet());
     }
 
     public List<KeptChunk> inWorld(String world) {
-        return chunks.stream().filter(chunk -> chunk.world().equals(world)).toList();
+        return chunks.keySet().stream().filter(chunk -> chunk.world().equals(world)).toList();
     }
 
     public int size() {
@@ -144,7 +204,7 @@ public final class ChunkStore {
     }
 
     public Collection<String> worlds() {
-        return chunks.stream().map(KeptChunk::world).distinct().sorted().toList();
+        return chunks.keySet().stream().map(KeptChunk::world).distinct().sorted().toList();
     }
 
     // --- named areas ---
@@ -175,7 +235,7 @@ public final class ChunkStore {
 
     /** True if the chunk is kept on its own or through at least one named area. */
     public boolean isKept(KeptChunk chunk) {
-        if (chunks.contains(chunk)) {
+        if (chunks.containsKey(chunk)) {
             return true;
         }
         for (NamedArea area : areas.values()) {
@@ -188,7 +248,7 @@ public final class ChunkStore {
 
     /** Every chunk that has to be force-loaded: single chunks plus the chunks of all areas. */
     public Set<KeptChunk> allKept() {
-        Set<KeptChunk> result = new HashSet<>(chunks);
+        Set<KeptChunk> result = new HashSet<>(chunks.keySet());
         for (NamedArea area : areas.values()) {
             result.addAll(area.chunks());
         }
@@ -200,7 +260,7 @@ public final class ChunkStore {
     }
 
     public boolean hasWorld(String world) {
-        return chunks.stream().anyMatch(chunk -> chunk.world().equals(world))
+        return chunks.keySet().stream().anyMatch(chunk -> chunk.world().equals(world))
                 || areas.values().stream().anyMatch(area -> area.world().equals(world));
     }
 }

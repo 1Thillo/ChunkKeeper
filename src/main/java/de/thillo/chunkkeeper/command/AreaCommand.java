@@ -13,6 +13,7 @@ import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Keeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Origin;
 import de.thillo.chunkkeeper.NamedArea;
 import de.thillo.chunkkeeper.Text;
 
@@ -111,6 +112,7 @@ final class AreaCommand implements Subcommand {
         if (!area.source().isEmpty()) {
             Messages.field(sender, "area.label-source", area.source());
         }
+        Messages.field(sender, "area.label-created", area.origin().describe());
         Comparator<KeptChunk> byX = Comparator.comparingInt(KeptChunk::x);
         int minX = area.chunks().stream().min(byX).map(KeptChunk::x).orElse(0);
         int maxX = area.chunks().stream().max(byX).map(KeptChunk::x).orElse(0);
@@ -129,6 +131,7 @@ final class AreaCommand implements Subcommand {
         NamedArea area = released.get().area();
         int stillKept = area.chunks().size() - released.get().unloaded();
         Messages.success(sender, "area.released", "name", area.name(), "count", area.chunks().size());
+        plugin.recordChange(sender, "history.area-released", "name", area.name(), "count", area.chunks().size());
         if (stillKept > 0) {
             Messages.info(sender, "area.still-kept", "count", stillKept);
         }
@@ -144,6 +147,7 @@ final class AreaCommand implements Subcommand {
         }
         if (plugin.keeper().renameArea(oldName, newName)) {
             Messages.success(sender, "area.renamed", "old", oldName, "new", newName);
+            plugin.recordChange(sender, "history.area-renamed", "old", oldName, "new", newName);
         } else {
             Messages.error(sender, "general.area-exists-short", "name", newName);
         }
@@ -167,13 +171,14 @@ final class AreaCommand implements Subcommand {
             return;
         }
         Optional<Integer> moved = plugin.keeper().convertToArea(areaName, selection.get().world(),
-                selection.get().chunks(), Messages.stored(selection.get().description()));
+                selection.get().chunks(), Messages.stored(selection.get().description()), Origin.now(sender.getName()));
         if (moved.isEmpty()) {
             Messages.error(sender, "general.area-exists-other-name", "name", areaName);
         } else if (moved.get() == 0) {
             Messages.error(sender, "area.nothing-to-convert", "selection", selection.get().description());
         } else {
             Messages.success(sender, "area.converted", "count", moved.get(), "selection", selection.get().description(), "name", areaName);
+            plugin.recordChange(sender, "history.area-converted", "name", areaName, "count", moved.get());
         }
     }
 
@@ -192,12 +197,13 @@ final class AreaCommand implements Subcommand {
 
     private void dissolve(CommandSender sender, String areaName) {
         Optional<NamedArea> area = plugin.store().area(areaName);
-        Optional<Integer> added = plugin.keeper().dissolveArea(areaName);
+        Optional<Integer> added = plugin.keeper().dissolveArea(areaName, Origin.now(sender.getName()));
         if (added.isEmpty() || area.isEmpty()) {
             Messages.error(sender, "general.area-unknown", "name", areaName);
             return;
         }
         Messages.success(sender, "area.dissolved", "name", areaName, "count", area.get().chunks().size(), "added", added.get());
+        plugin.recordChange(sender, "history.area-dissolved", "name", areaName, "count", area.get().chunks().size());
     }
 
     private Optional<NamedArea> find(CommandSender sender, String areaName) {

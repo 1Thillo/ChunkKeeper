@@ -38,6 +38,35 @@ class TranslationsTest {
         return names;
     }
 
+    /**
+     * YAML only warns about a key that appears twice and quietly uses the last one, so a doubled
+     * key would go unnoticed. This reads the files line by line and fails instead.
+     */
+    @Test
+    void noKeyAppearsTwice() throws IOException {
+        for (String language : new String[] {"en", "de"}) {
+            Set<String> seen = new TreeSet<>();
+            Set<String> doubled = new TreeSet<>();
+            String section = "";
+            try (InputStream in = TranslationsTest.class.getResourceAsStream("/messages/" + language + ".yml")) {
+                for (String line : new String(in.readAllBytes(), StandardCharsets.UTF_8).split("\n")) {
+                    if (line.isBlank() || line.trim().startsWith("#") || !line.contains(":")) {
+                        continue;
+                    }
+                    String key = line.trim().substring(0, line.trim().indexOf(':'));
+                    if (!line.startsWith(" ")) {
+                        section = key;
+                    }
+                    String path = line.startsWith(" ") ? section + "." + key : key;
+                    if (!seen.add(path)) {
+                        doubled.add(path);
+                    }
+                }
+            }
+            assertEquals(Set.of(), doubled, "doubled keys in " + language + ".yml");
+        }
+    }
+
     @Test
     void germanHasExactlyTheEnglishKeys() throws IOException {
         assertEquals(new TreeSet<>(builtIn("en").keySet()), new TreeSet<>(builtIn("de").keySet()));

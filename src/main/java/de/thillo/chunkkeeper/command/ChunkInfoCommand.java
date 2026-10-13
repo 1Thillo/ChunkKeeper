@@ -12,6 +12,7 @@ import de.thillo.chunkkeeper.Area;
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Origin;
 import de.thillo.chunkkeeper.Text;
 
 /** {@code chunkinfo}: whether a chunk is kept, force-loaded and currently loaded. */
@@ -70,6 +71,7 @@ final class ChunkInfoCommand implements Subcommand {
         KeptChunk chunk = target.get();
         boolean kept = plugin.store().isKept(chunk);
         boolean single = plugin.store().contains(chunk);
+        Origin origin = plugin.store().origin(chunk).orElse(Origin.UNKNOWN);
         List<String> areas = plugin.store().areasContaining(chunk);
         World world = Bukkit.getWorld(chunk.world());
         // On Folia the force-load flags may only be read on the global region thread.
@@ -80,6 +82,9 @@ final class ChunkInfoCommand implements Subcommand {
                     "x1", chunk.x() * 16, "x2", chunk.x() * 16 + 15, "z1", chunk.z() * 16, "z2", chunk.z() * 16 + 15));
             Messages.yesNo(sender, "info.label-kept", kept);
             Messages.yesNo(sender, "info.label-on-its-own", single);
+            if (single) {
+                Messages.field(sender, "info.label-added", origin.describe());
+            }
             Messages.field(sender, "info.label-areas", areas.isEmpty() ? Text.of("general.none") : String.join(", ", areas));
             Messages.yesNo(sender, "info.label-force-loaded", forceLoaded);
             Messages.yesNo(sender, "info.label-loaded", world.isChunkLoaded(chunk.x(), chunk.z()));

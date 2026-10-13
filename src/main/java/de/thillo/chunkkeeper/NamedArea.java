@@ -9,8 +9,9 @@ import java.util.regex.Pattern;
  * to at least one named area.
  *
  * @param source how the area was made, for messages, e.g. "WorldGuard region 'halloween' in 'world'"
+ * @param origin who created it and when
  */
-public record NamedArea(String name, String world, Set<KeptChunk> chunks, String source) {
+public record NamedArea(String name, String world, Set<KeptChunk> chunks, String source, Origin origin) {
 
     /** Lower-case letters, digits, "-" and "_", so a name is easy to type and safe as a YAML key. */
     private static final Pattern VALID_NAME = Pattern.compile("[a-z0-9_-]{1,32}");
@@ -25,5 +26,9 @@ public record NamedArea(String name, String world, Set<KeptChunk> chunks, String
 
     public boolean contains(KeptChunk chunk) {
         return chunks.contains(chunk);
+    }
+
+    public NamedArea renamed(String newName) {
+        return new NamedArea(newName, world, chunks, source, origin);
     }
 }

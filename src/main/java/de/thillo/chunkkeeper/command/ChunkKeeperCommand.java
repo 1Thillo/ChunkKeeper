@@ -47,6 +47,7 @@ public final class ChunkKeeperCommand implements CommandExecutor, TabCompleter {
         add(new ChunkInfoCommand(plugin));
         add(new ReloadCommand(plugin));
         add(new ImportCommand(plugin));
+        add(new HistoryCommand(plugin));
         add(new VersionCommand(plugin));
     }
 

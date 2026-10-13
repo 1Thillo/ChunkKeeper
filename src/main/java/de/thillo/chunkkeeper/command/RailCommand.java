@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Origin;
 import de.thillo.chunkkeeper.NamedArea;
 import de.thillo.chunkkeeper.Text;
 import de.thillo.chunkkeeper.rail.RailTracer;
@@ -63,6 +64,7 @@ final class RailCommand implements Subcommand {
         World world = at.getWorld();
         Messages.info(sender, "rail.following", "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(), "world", world.getName());
 
+        Text railway = Text.of("describe.railway", "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(), "world", world.getName());
         new RailTracer(plugin, world, plugin.settings().railSearchLimit(), result -> {
             if (!result.startFound()) {
                 Messages.error(sender, "rail.no-rail");
@@ -73,22 +75,28 @@ final class RailCommand implements Subcommand {
             }
             int total = result.chunks().size();
             if (areaName.isPresent()) {
-                String description = Messages.stored(Text.of("describe.railway",
-                        "x", at.getBlockX(), "y", at.getBlockY(), "z", at.getBlockZ(), "world", world.getName()));
+                String description = Messages.stored(railway);
                 Optional<Integer> newlyLoaded = plugin.keeper().createArea(
-                        new NamedArea(areaName.get(), world.getName(), result.chunks(), description));
+                        new NamedArea(areaName.get(), world.getName(), result.chunks(), description, Origin.now(sender.getName())));
                 if (newlyLoaded.isEmpty()) {
                     Messages.error(sender, "general.area-exists-short", "name", areaName.get());
                 } else {
                     Messages.success(sender, "rail.area-created", "rails", result.rails(), "name", areaName.get(),
                             "count", total, "new", newlyLoaded.get());
+                    plugin.recordChange(sender, "history.area-created", "name", areaName.get(), "count", total, "source", railway);
                 }
             } else if (keep) {
-                int added = plugin.keeper().keep(result.chunks());
+                int added = plugin.keeper().keep(result.chunks(), Origin.now(sender.getName()));
                 Messages.success(sender, "rail.kept", "rails", result.rails(), "added", added, "total", total, "already", total - added);
+                if (added > 0) {
+                    plugin.recordChange(sender, "history.kept-chunks", "count", added, "area", railway);
+                }
             } else {
                 int removed = plugin.keeper().release(result.chunks());
                 Messages.success(sender, "rail.released", "rails", result.rails(), "removed", removed, "total", total);
+                if (removed > 0) {
+                    plugin.recordChange(sender, "history.released-chunks", "count", removed, "area", railway);
+                }
             }
         }).start(at.getBlockX(), at.getBlockY(), at.getBlockZ());
     }
