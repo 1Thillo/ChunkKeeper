@@ -47,5 +47,12 @@ chk releaseregion coords 40 40 41 41 world
 chk area convert imported world world
 chk area dissolve imported
 chk reload
+# Who and when, backups and the history
+chk area info farm
+chk chunkinfo coords 10 10 world
+chk backup create
+chk backup list
+chk backup restore nope
 chk releaseall confirm
 chk list
+chk history
