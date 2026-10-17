@@ -121,6 +121,29 @@ class TranslationsTest {
     }
 
     @Test
+    void choosesSingularOrPlural() {
+        Translations translations = new Translations(Map.of("en", Map.of("list.header", "{count} {count|chunk is|chunks are} kept")));
+        assertEquals("1 chunk is kept", translations.format("en", Text.of("list.header", "count", 1)));
+        assertEquals("2 chunks are kept", translations.format("en", Text.of("list.header", "count", 2)));
+        assertEquals("0 chunks are kept", translations.format("en", Text.of("list.header", "count", 0L)));
+    }
+
+    /** A typo like {cuont|chunk|chunks} would always pick the plural, so every form must name a placeholder of its text. */
+    @Test
+    void pluralFormsNameAPlaceholderOfTheirText() throws IOException {
+        Pattern plural = Pattern.compile("\\{([a-z0-9]+)\\|");
+        for (String language : new String[] {"en", "de"}) {
+            for (Map.Entry<String, String> text : builtIn(language).entrySet()) {
+                Matcher matcher = plural.matcher(text.getValue());
+                while (matcher.find()) {
+                    assertTrue(placeholders(text.getValue()).contains(matcher.group(1)),
+                            language + " " + text.getKey() + ": {" + matcher.group(1) + "|...} without {" + matcher.group(1) + "}");
+                }
+            }
+        }
+    }
+
+    @Test
     void fallsBackToEnglishAndThenToTheKey() {
         Translations translations = new Translations(Map.of("en", Map.of("only.english", "hello"), "de", Map.of()));
         assertEquals("hello", translations.format("de", Text.of("only.english")));
