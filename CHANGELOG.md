@@ -6,7 +6,7 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
-## [1.2.0] - 2026-10-13
+## [1.2.0] - 2026-10-17
 
 ### Added
 - German messages. With `language: auto` every player gets their Minecraft language (English and
