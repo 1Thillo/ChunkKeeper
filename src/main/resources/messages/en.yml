@@ -1,0 +1,138 @@
+# ChunkKeeper messages, English.
+#
+# Change any text here and run /chunkkeeper reload. Words in {braces} are filled in by the plugin;
+# keep them, but you may move them. A missing key falls back to the built-in text.
+
+general:
+  yes-word: "yes"
+  no-word: "no"
+  none: "none"
+  unknown-subcommand: "Unknown subcommand '{subcommand}'. See /chunkkeeper help."
+  no-permission: "You don't have permission to do that."
+  usage: "Usage: /chunkkeeper {command} {usage}"
+  not-a-number: "'{text}' is not a whole number."
+  unknown-world: "World '{world}' does not exist or is not loaded."
+  players-only: "Only players can do that. From the console, use 'coords' instead."
+  worldedit-missing: "WorldEdit or FastAsyncWorldEdit is not installed."
+  worldguard-missing: "WorldGuard is not installed."
+  area-too-large: "That area has {size} chunks, more than the limit of {limit} (max-area-chunks in config.yml)."
+  name-missing: "Give a name after --name, e.g. --name halloween."
+  invalid-name: "'{name}' is not a valid area name. Use up to 32 letters, digits, - and _."
+  use-area-release: "To release a named area, use /chunkkeeper area release <name>."
+  area-exists: "There is already an area called '{name}'. Release it first or choose another name."
+  area-exists-short: "There is already an area called '{name}'."
+  area-exists-other-name: "There is already an area called '{name}'. Choose another name."
+  area-unknown: "There is no area called '{name}'. See /chunkkeeper area list."
+
+# Pieces that are put into other messages
+describe:
+  chunk: "({x}, {z}) in '{world}'"
+  rectangle: "chunks ({x1}, {z1}) to ({x2}, {z2}) in '{world}'"
+  worldedit: "your WorldEdit selection in '{world}'"
+  worldguard: "WorldGuard region '{region}' in '{world}'"
+  world-singles: "all single chunks in '{world}'"
+  railway: "the railway from {x}, {y}, {z} in '{world}'"
+
+help:
+  header: "ChunkKeeper commands (aliases /keepchunks, /kc, /ck, /chk):"
+  keepchunk: "Keep one chunk loaded."
+  releasechunk: "Stop keeping one chunk loaded."
+  keepregion: "Keep all chunks of an area loaded, optionally as a named area."
+  releaseregion: "Stop keeping the single chunks of an area loaded (named areas: /chunkkeeper area release)."
+  keeprail: "Keep the chunks along a railway loaded."
+  releaserail: "Stop keeping the chunks along a railway loaded."
+  area: "Manage named areas."
+  releaseall: "Stop keeping any chunk loaded."
+  list: "Show the kept chunks."
+  chunkinfo: "Show whether a chunk or an area is kept loaded."
+  reload: "Reload config.yml, chunks.yml and the messages."
+  import: "Add the chunks from KeepChunks' data.yml."
+  version: "Show the plugin and server version."
+
+chunk:
+  already-kept: "Chunk {chunk} is already kept on its own."
+  kept: "Keeping chunk {chunk} loaded."
+  released: "Released chunk {chunk}."
+  not-kept: "Chunk {chunk} was not kept loaded."
+  not-kept-on-its-own: "Chunk {chunk} is not kept on its own."
+  stays-through-areas: "It stays loaded through the named area(s) {areas}. Use /chunkkeeper area release <name> to release an area."
+
+region:
+  area-created: "Created area '{name}' with {count} chunks from {source} ({new} of them were not kept before)."
+  kept: "Keeping {added} more chunks loaded ({total} in {area}, {already} were kept already)."
+  released: "Released {removed} of the {total} chunks in {area}."
+  still-in-areas: "{count} of them stay loaded because they belong to named areas."
+
+rail:
+  following: "Following the rails from {x}, {y}, {z} in '{world}'..."
+  no-rail: "There is no rail at that position. Stand on the track or give its coordinates."
+  limit-hit: "Stopped after {rails} rails (rail-search-limit in config.yml). Only the part found so far is used."
+  area-created: "Found {rails} rails. Created area '{name}' with {count} chunks ({new} of them were not kept before)."
+  kept: "Found {rails} rails. Keeping {added} more chunks loaded ({total} along the track, {already} were kept already)."
+  released: "Found {rails} rails. Released {removed} of the {total} chunks along the track."
+
+area:
+  none: "There are no named areas. Create one with /chunkkeeper keepregion ... --name <name>."
+  list-header: "{count} named areas:"
+  list-entry: "{count} chunks in '{world}'"
+  info-header: "Area '{name}'"
+  label-world: "World"
+  label-chunks: "Chunks"
+  label-source: "Made from"
+  label-span: "Spans chunks"
+  span: "({x1}, {z1}) to ({x2}, {z2})"
+  released: "Released area '{name}' ({count} chunks)."
+  still-kept: "{count} of its chunks stay loaded because they are kept on their own or by other areas."
+  renamed: "Renamed area '{old}' to '{new}'."
+  nothing-to-convert: "There are no single chunks in {selection}, so there is nothing to convert. No area was created."
+  converted: "Converted {count} single chunks from {selection} into area '{name}'. They stayed loaded the whole time."
+  dissolved: "Dissolved area '{name}': its {count} chunks are now kept on their own ({added} of them were not before). Nothing was unloaded."
+
+info:
+  area-header: "Area: {area}"
+  label-area-chunks: "Chunks in the area"
+  label-kept: "Kept by ChunkKeeper"
+  chunk-header: "Chunk {chunk}"
+  label-blocks: "Blocks"
+  blocks: "x {x1} to {x2}, z {z1} to {z2}"
+  label-on-its-own: "Kept on its own"
+  label-areas: "Named areas"
+  label-force-loaded: "Force-loaded"
+  label-loaded: "Loaded right now"
+  not-force-loaded-yet: "The chunk is kept but not force-loaded yet; this fixes itself within a moment or after /chunkkeeper reload."
+  forced-by-something-else: "Something else force-loads this chunk, for example the vanilla /forceload command."
+
+list:
+  nothing: "No chunks are kept loaded."
+  header: "{count} chunks are kept loaded:"
+  world-entry: "{count} chunks"
+  details-hint: "Details: /chunkkeeper list <world> [page]"
+  no-singles-in-world: "No single chunks are kept in world '{world}'. Named areas: /chunkkeeper area list"
+  no-such-page: "Page {page} does not exist. There are {pages} pages."
+  page-header: "Kept chunks in '{world}', page {page} of {pages}:"
+  chunk-label: "Chunk ({x}, {z})"
+  chunk-entry: "blocks {x}, {z}"
+
+releaseall:
+  console-only: "Only the server console may do that (release-all-console-only in config.yml)."
+  confirm: "This releases all {chunks} single chunks and all {areas} named areas. Type /chunkkeeper releaseall confirm to do it."
+  done: "Released {chunks} chunks and {areas} named areas."
+
+reload:
+  done: "Reloaded. {chunks} single chunks and {areas} named areas are kept loaded."
+
+import:
+  no-file: "There is no {file} to import from."
+  done: "Found {found} chunks in KeepChunks' data.yml, {added} of them were new."
+  unreadable: "{count} entries could not be read; see the console."
+
+version:
+  plugin: "ChunkKeeper v{version}"
+  server: "Server: {platform} {minecraft} ({server})"
+
+worldedit:
+  no-selection: "Select an area with WorldEdit first."
+
+worldguard:
+  unknown-region: "There is no WorldGuard region '{region}' in world '{world}'."
+  global-region: "The global region covers the whole world and cannot be kept loaded."

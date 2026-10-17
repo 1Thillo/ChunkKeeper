@@ -29,6 +29,7 @@ public final class ChunkKeeper extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        addMissingConfigOptions();
         store = new ChunkStore(new File(getDataFolder(), "chunks.yml"), getLogger());
         loader = new ChunkLoader(this);
         keeper = new Keeper(store, loader);
@@ -43,6 +44,7 @@ public final class ChunkKeeper extends JavaPlugin {
             saveConfig();
         });
         settings = Settings.from(getConfig());
+        loadMessages();
 
         store.load();
         keepAllLoaded();
@@ -54,6 +56,16 @@ public final class ChunkKeeper extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
         registerCommand();
+    }
+
+    private void loadMessages() {
+        Messages.configure(MessageFiles.load(this), settings.language(), settings.consoleLanguage());
+    }
+
+    /** Servers updating from an older version get the options that are new in their config.yml. */
+    private void addMissingConfigOptions() {
+        getConfig().options().copyDefaults(true);
+        saveConfig();
     }
 
     private void registerCommand() {
@@ -99,12 +111,14 @@ public final class ChunkKeeper extends JavaPlugin {
     }
 
     /**
-     * Reads config.yml and chunks.yml again. Chunks that were removed from the file are released,
+     * Reads config.yml, the messages and chunks.yml again. Chunks that were removed from the file are released,
      * all others are force-loaded (again).
      */
     public void reload() {
         reloadConfig();
+        addMissingConfigOptions();
         settings = Settings.from(getConfig());
+        loadMessages();
 
         Set<KeptChunk> before = store.allKept();
         store.load();

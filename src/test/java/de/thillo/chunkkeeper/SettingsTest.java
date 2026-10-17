@@ -11,7 +11,7 @@ class SettingsTest {
     @Test
     void missingValuesFallBackToDefaults() {
         Settings settings = Settings.from(new YamlConfiguration());
-        assertEquals(new Settings(true, true, true, 50000, 10000), settings);
+        assertEquals(new Settings(true, true, true, 50000, 10000, "auto", "en"), settings);
     }
 
     @Test
@@ -23,8 +23,10 @@ class SettingsTest {
                 legacy-permissions: false
                 rail-search-limit: 123
                 max-area-chunks: 456
+                language: de
+                console-language: de
                 """);
-        assertEquals(new Settings(false, false, false, 123, 456), Settings.from(config));
+        assertEquals(new Settings(false, false, false, 123, 456, "de", "de"), Settings.from(config));
     }
 
     @Test

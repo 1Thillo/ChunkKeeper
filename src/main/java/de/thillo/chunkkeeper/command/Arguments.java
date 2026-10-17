@@ -29,7 +29,7 @@ final class Arguments {
         try {
             return Optional.of(Integer.parseInt(text));
         } catch (NumberFormatException e) {
-            sender.sendMessage(Messages.error("'" + text + "' is not a whole number."));
+            Messages.error(sender, "general.not-a-number", "text", text);
             return Optional.empty();
         }
     }
@@ -37,7 +37,7 @@ final class Arguments {
     static Optional<World> world(CommandSender sender, String name) {
         World world = Bukkit.getWorld(name);
         if (world == null) {
-            sender.sendMessage(Messages.error("World '" + name + "' does not exist or is not loaded."));
+            Messages.error(sender, "general.unknown-world", "world", name);
         }
         return Optional.ofNullable(world);
     }
@@ -46,7 +46,7 @@ final class Arguments {
         if (sender instanceof Player player) {
             return Optional.of(player);
         }
-        sender.sendMessage(Messages.error("Only players can do that. From the console, use 'coords' instead."));
+        Messages.error(sender, "general.players-only");
         return Optional.empty();
     }
 
@@ -109,14 +109,14 @@ final class Arguments {
                 return Optional.empty();
             }
             if (plugin.hooks().worldEdit().isEmpty()) {
-                sender.sendMessage(Messages.error("WorldEdit or FastAsyncWorldEdit is not installed."));
+                Messages.error(sender, "general.worldedit-missing");
                 return Optional.empty();
             }
             return plugin.hooks().worldEdit().get().selection(player.get());
         }
         if (mode.equals("worldguard") && args.length == 3) {
             if (plugin.hooks().worldGuard().isEmpty()) {
-                sender.sendMessage(Messages.error("WorldGuard is not installed."));
+                Messages.error(sender, "general.worldguard-missing");
                 return Optional.empty();
             }
             Optional<World> world = world(sender, args[2]);
@@ -127,8 +127,7 @@ final class Arguments {
     }
 
     private static void tooLarge(CommandSender sender, long size, int limit) {
-        sender.sendMessage(Messages.error("That area has " + size + " chunks, more than the limit of " + limit
-                + " (max-area-chunks in config.yml)."));
+        Messages.error(sender, "general.area-too-large", "size", size, "limit", limit);
     }
 
     /** Tab completion for the area modes. */
@@ -172,12 +171,12 @@ final class Arguments {
                 continue;
             }
             if (i + 1 >= args.length) {
-                sender.sendMessage(Messages.error("Give a name after --name, e.g. --name halloween."));
+                Messages.error(sender, "general.name-missing");
                 return Optional.empty();
             }
             name = args[++i].toLowerCase();
             if (!NamedArea.isValidName(name)) {
-                sender.sendMessage(Messages.error("'" + args[i] + "' is not a valid area name. Use up to 32 letters, digits, - and _."));
+                Messages.error(sender, "general.invalid-name", "name", args[i]);
                 return Optional.empty();
             }
         }
@@ -196,7 +195,7 @@ final class Arguments {
     }
 
     static void sendUsage(CommandSender sender, String command, String usage) {
-        sender.sendMessage(Messages.error("Usage: /chunkkeeper " + command + " " + usage));
+        Messages.error(sender, "general.usage", "command", command, "usage", usage);
     }
 
     /**

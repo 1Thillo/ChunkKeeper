@@ -28,24 +28,19 @@ final class ReleaseAllCommand implements Subcommand {
         return "confirm";
     }
 
-    @Override
-    public String description() {
-        return "Stop keeping any chunk loaded.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (plugin.settings().releaseAllConsoleOnly() && !(sender instanceof ConsoleCommandSender)) {
-            sender.sendMessage(Messages.error("Only the server console may do that (release-all-console-only in config.yml)."));
+            Messages.error(sender, "releaseall.console-only");
             return;
         }
         if (args.length != 1 || !args[0].equalsIgnoreCase("confirm")) {
-            sender.sendMessage(Messages.error("This releases all " + plugin.store().size() + " single chunks and all "
-                    + plugin.store().areas().size() + " named areas. Type /chunkkeeper releaseall confirm to do it."));
+            Messages.error(sender, "releaseall.confirm", "chunks", plugin.store().size(), "areas", plugin.store().areas().size());
             return;
         }
         Keeper.ReleaseAll released = plugin.keeper().releaseAll();
-        sender.sendMessage(Messages.success("Released " + released.chunks() + " chunks and " + released.areas() + " named areas."));
+        Messages.success(sender, "releaseall.done", "chunks", released.chunks(), "areas", released.areas());
     }
 
     @Override

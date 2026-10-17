@@ -24,15 +24,10 @@ final class ReloadCommand implements Subcommand {
         return "";
     }
 
-    @Override
-    public String description() {
-        return "Reload config.yml and chunks.yml.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         plugin.reload();
-        sender.sendMessage(Messages.success("Reloaded. " + plugin.store().size() + " single chunks and "
-                + plugin.store().areas().size() + " named areas are kept loaded."));
+        Messages.success(sender, "reload.done", "chunks", plugin.store().size(), "areas", plugin.store().areas().size());
     }
 }

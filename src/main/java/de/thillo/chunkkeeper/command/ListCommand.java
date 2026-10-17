@@ -10,6 +10,7 @@ import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.KeptChunk;
 import de.thillo.chunkkeeper.Messages;
 import de.thillo.chunkkeeper.NamedArea;
+import de.thillo.chunkkeeper.Text;
 
 /**
  * {@code list}: how many chunks are kept per world, or with a world name the chunks themselves,
@@ -35,10 +36,6 @@ final class ListCommand implements Subcommand {
         return "[<world> [page]]";
     }
 
-    @Override
-    public String description() {
-        return "Show the kept chunks.";
-    }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
@@ -62,20 +59,20 @@ final class ListCommand implements Subcommand {
     private void listWorlds(CommandSender sender) {
         List<NamedArea> areas = plugin.store().areas();
         if (plugin.store().size() == 0 && areas.isEmpty()) {
-            sender.sendMessage(Messages.info("No chunks are kept loaded."));
+            Messages.info(sender, "list.nothing");
             return;
         }
         if (plugin.store().size() > 0) {
-            sender.sendMessage(Messages.info(plugin.store().size() + " chunks are kept loaded:"));
+            Messages.info(sender, "list.header", "count", plugin.store().size());
             for (String world : plugin.store().worlds()) {
-                sender.sendMessage(Messages.field(world, plugin.store().inWorld(world).size() + " chunks"));
+                Messages.namedField(sender, world, Text.of("list.world-entry", "count", plugin.store().inWorld(world).size()));
             }
-            sender.sendMessage(Messages.info("Details: /chunkkeeper list <world> [page]"));
+            Messages.info(sender, "list.details-hint");
         }
         if (!areas.isEmpty()) {
-            sender.sendMessage(Messages.info(areas.size() + " named areas:"));
+            Messages.info(sender, "area.list-header", "count", areas.size());
             for (NamedArea area : areas) {
-                sender.sendMessage(Messages.field(area.name(), area.chunks().size() + " chunks in '" + area.world() + "'"));
+                Messages.namedField(sender, area.name(), Text.of("area.list-entry", "count", area.chunks().size(), "world", area.world()));
             }
         }
     }
@@ -85,19 +82,19 @@ final class ListCommand implements Subcommand {
                 .sorted(Comparator.comparingInt(KeptChunk::x).thenComparingInt(KeptChunk::z))
                 .toList();
         if (chunks.isEmpty()) {
-            sender.sendMessage(Messages.error("No single chunks are kept in world '" + world + "'. Named areas: /chunkkeeper area list"));
+            Messages.error(sender, "list.no-singles-in-world", "world", world);
             return;
         }
         int pages = (chunks.size() + PAGE_SIZE - 1) / PAGE_SIZE;
         if (page < 1 || page > pages) {
-            sender.sendMessage(Messages.error("Page " + page + " does not exist. There are " + pages + " pages."));
+            Messages.error(sender, "list.no-such-page", "page", page, "pages", pages);
             return;
         }
-        sender.sendMessage(Messages.info("Kept chunks in '" + world + "', page " + page + " of " + pages + ":"));
+        Messages.info(sender, "list.page-header", "world", world, "page", page, "pages", pages);
         int from = (page - 1) * PAGE_SIZE;
         for (KeptChunk chunk : chunks.subList(from, Math.min(from + PAGE_SIZE, chunks.size()))) {
-            sender.sendMessage(Messages.field("Chunk (" + chunk.x() + ", " + chunk.z() + ")",
-                    "blocks " + (chunk.x() * 16) + ", " + (chunk.z() * 16)));
+            Messages.namedField(sender, Messages.text(sender, "list.chunk-label", "x", chunk.x(), "z", chunk.z()),
+                    Text.of("list.chunk-entry", "x", chunk.x() * 16, "z", chunk.z() * 16));
         }
     }
 

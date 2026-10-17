@@ -8,7 +8,9 @@ public record Settings(
         boolean preventWorldUnload,
         boolean legacyPermissions,
         int railSearchLimit,
-        int maxAreaChunks) {
+        int maxAreaChunks,
+        String language,
+        String consoleLanguage) {
 
     public static Settings from(FileConfiguration config) {
         return new Settings(
@@ -16,6 +18,8 @@ public record Settings(
                 config.getBoolean("prevent-world-unload", true),
                 config.getBoolean("legacy-permissions", true),
                 Math.max(1, config.getInt("rail-search-limit", 50000)),
-                Math.max(1, config.getInt("max-area-chunks", 10000)));
+                Math.max(1, config.getInt("max-area-chunks", 10000)),
+                config.getString("language", "auto"),
+                config.getString("console-language", "en"));
     }
 }
