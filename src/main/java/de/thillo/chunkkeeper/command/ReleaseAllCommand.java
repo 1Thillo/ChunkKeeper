@@ -39,6 +39,7 @@ final class ReleaseAllCommand implements Subcommand {
             Messages.error(sender, "releaseall.confirm", "chunks", plugin.store().size(), "areas", plugin.store().areas().size());
             return;
         }
+        plugin.backupNow("releaseall").ifPresent(backup -> Messages.info(sender, "backup.automatic", "name", backup));
         Keeper.ReleaseAll released = plugin.keeper().releaseAll();
         Messages.success(sender, "releaseall.done", "chunks", released.chunks(), "areas", released.areas());
         plugin.recordChange(sender, "history.released-all", "chunks", released.chunks(), "areas", released.areas());

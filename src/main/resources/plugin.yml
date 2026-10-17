@@ -26,6 +26,7 @@ permissions:
       chunkkeeper.reload: true
       chunkkeeper.import: true
       chunkkeeper.history: true
+      chunkkeeper.backup: true
       chunkkeeper.keepchunk: true
       chunkkeeper.releasechunk: true
       chunkkeeper.keepregion: true
@@ -47,6 +48,8 @@ permissions:
   chunkkeeper.import:
     default: op
   chunkkeeper.history:
+    default: op
+  chunkkeeper.backup:
     default: op
   chunkkeeper.keepchunk:
     default: op

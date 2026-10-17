@@ -1,11 +1,13 @@
 package de.thillo.chunkkeeper;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -27,6 +29,7 @@ public final class ChunkKeeper extends JavaPlugin {
     private KeepChunksImporter importer;
     private Hooks hooks;
     private History history;
+    private Backups backups;
 
     @Override
     public void onEnable() {
@@ -48,10 +51,13 @@ public final class ChunkKeeper extends JavaPlugin {
         });
         settings = Settings.from(getConfig());
         loadMessages();
+        backups = new Backups(new File(getDataFolder(), "chunks.yml").toPath(), new File(getDataFolder(), "backups").toPath(),
+                settings.backupsToKeep());
 
         store.load();
-        keepAllLoaded();
+        // Import first, so the count below includes the imported chunks.
         imported.ifPresent(this::finishImport);
+        keepAllLoaded();
         if (!store.fileExists()) {
             store.save();
         }
@@ -123,7 +129,13 @@ public final class ChunkKeeper extends JavaPlugin {
         addMissingConfigOptions();
         settings = Settings.from(getConfig());
         loadMessages();
+        backups = new Backups(new File(getDataFolder(), "chunks.yml").toPath(), new File(getDataFolder(), "backups").toPath(),
+                settings.backupsToKeep());
+        reloadChunks();
+    }
 
+    /** Reads chunks.yml again: chunks that are gone are released, all others are force-loaded (again). */
+    public void reloadChunks() {
         Set<KeptChunk> before = store.allKept();
         store.load();
         List<KeptChunk> removed = before.stream().filter(chunk -> !store.isKept(chunk)).toList();
@@ -161,6 +173,25 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public History history() {
         return history;
+    }
+
+    public Backups backups() {
+        return backups;
+    }
+
+    /**
+     * Saves chunks.yml and copies it to the backups folder.
+     *
+     * @return the name of the backup, or empty if there was nothing to save or it failed (see the console)
+     */
+    public Optional<String> backupNow(String reason) {
+        store.save();
+        try {
+            return backups.create(reason);
+        } catch (IOException e) {
+            getLogger().log(Level.WARNING, "Could not make a backup of chunks.yml", e);
+            return Optional.empty();
+        }
     }
 
     /** Writes a change to history.log, in the console language, with the sender as the person who made it. */

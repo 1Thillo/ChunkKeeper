@@ -40,6 +40,7 @@ final class ImportCommand implements Subcommand {
             Messages.error(sender, "import.no-file", "file", importer.dataFile().getPath());
             return;
         }
+        plugin.backupNow("import").ifPresent(backup -> Messages.info(sender, "backup.automatic", "name", backup));
         int added = plugin.keeper().keep(result.get().chunks(), Origin.now(sender.getName() + " (KeepChunks import)"));
         Messages.success(sender, "import.done", "found", result.get().chunks().size(), "added", added);
         plugin.recordChange(sender, "history.imported", "count", added);

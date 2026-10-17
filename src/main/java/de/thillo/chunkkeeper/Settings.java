@@ -10,7 +10,8 @@ public record Settings(
         int railSearchLimit,
         int maxAreaChunks,
         String language,
-        String consoleLanguage) {
+        String consoleLanguage,
+        int backupsToKeep) {
 
     public static Settings from(FileConfiguration config) {
         return new Settings(
@@ -20,6 +21,7 @@ public record Settings(
                 Math.max(1, config.getInt("rail-search-limit", 50000)),
                 Math.max(1, config.getInt("max-area-chunks", 10000)),
                 config.getString("language", "auto"),
-                config.getString("console-language", "en"));
+                config.getString("console-language", "en"),
+                Math.max(1, config.getInt("backups-to-keep", 20)));
     }
 }

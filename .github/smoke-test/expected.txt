@@ -37,3 +37,12 @@ Dissolved area 'block': its 4 chunks are now kept on their own (4 of them were n
 Released 4 of the 4 chunks
 Converted 2 single chunks from all single chunks in 'world' into area 'imported'
 Dissolved area 'imported': its 2 chunks are now kept on their own
+Created by: CONSOLE,
+Added on its own by: CONSOLE,
+Saved backup
+backups, newest first:
+There is no backup called 'nope'
+Saved a backup first:
+Changes, newest first
+| CONSOLE | released all: 2 chunks and 1 named areas
+| CONSOLE | made backup

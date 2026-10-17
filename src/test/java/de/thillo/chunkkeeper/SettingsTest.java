@@ -11,7 +11,7 @@ class SettingsTest {
     @Test
     void missingValuesFallBackToDefaults() {
         Settings settings = Settings.from(new YamlConfiguration());
-        assertEquals(new Settings(true, true, true, 50000, 10000, "auto", "en"), settings);
+        assertEquals(new Settings(true, true, true, 50000, 10000, "auto", "en", 20), settings);
     }
 
     @Test
@@ -25,8 +25,9 @@ class SettingsTest {
                 max-area-chunks: 456
                 language: de
                 console-language: de
+                backups-to-keep: 5
                 """);
-        assertEquals(new Settings(false, false, false, 123, 456, "de", "de"), Settings.from(config));
+        assertEquals(new Settings(false, false, false, 123, 456, "de", "de", 5), Settings.from(config));
     }
 
     @Test

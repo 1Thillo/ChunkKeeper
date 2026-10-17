@@ -25,14 +25,15 @@ general:
   area-exists-other-name: "Es gibt schon einen Bereich „{name}“. Wähle einen anderen Namen."
   area-unknown: "Es gibt keinen Bereich „{name}“. Siehe /chunkkeeper area list."
 
-# Bausteine, die in andere Meldungen eingesetzt werden
+# Bausteine, die in andere Meldungen eingesetzt werden. Ohne Artikel, weil sie mal nach „aus“
+# oder „in“ stehen und mal nach einem Doppelpunkt.
 describe:
   chunk: "({x}, {z}) in „{world}“"
   rectangle: "Chunks ({x1}, {z1}) bis ({x2}, {z2}) in „{world}“"
-  worldedit: "deine WorldEdit-Auswahl in „{world}“"
+  worldedit: "WorldEdit-Auswahl in „{world}“"
   worldguard: "WorldGuard-Region „{region}“ in „{world}“"
-  world-singles: "alle Einzelchunks in „{world}“"
-  railway: "die Schienenstrecke ab {x}, {y}, {z} in „{world}“"
+  world-singles: "Einzelchunks in „{world}“"
+  railway: "Schienenstrecke ab {x}, {y}, {z} in „{world}“"
 
 help:
   header: "ChunkKeeper-Befehle (auch /keepchunks, /kc, /ck, /chk):"
@@ -50,6 +51,7 @@ help:
   import: "Die Chunks aus der data.yml von KeepChunks übernehmen."
   version: "Plugin- und Serverversion anzeigen."
   history: "Anzeigen, wer wann was geändert hat."
+  backup: "Sicherungen der chunks.yml anzeigen, anlegen und wiederherstellen."
 
 chunk:
   already-kept: "Chunk {chunk} wird schon einzeln gehalten."
@@ -153,6 +155,20 @@ history:
   area-dissolved: "Bereich „{name}“ aufgelöst ({count} Chunks)"
   released-all: "alles freigegeben: {chunks} Chunks und {areas} benannte Bereiche"
   imported: "{count} Chunks aus KeepChunks übernommen"
+  backup-created: "Sicherung {name} angelegt"
+  backup-restored: "Sicherung {name} wiederhergestellt"
+
+backup:
+  none: "Es gibt noch keine Sicherungen. Sie entstehen vor releaseall, import und restore oder mit /chunkkeeper backup create."
+  list-header: "{count} Sicherungen, neueste zuerst:"
+  contents: "{chunks} Einzelchunks, {areas} benannte Bereiche"
+  nothing-to-save: "Es gibt noch keine chunks.yml zum Sichern."
+  created: "Sicherung {name} angelegt."
+  automatic: "Vorher gesichert: {name} (rückgängig mit /chunkkeeper backup restore {name})."
+  unknown: "Es gibt keine Sicherung „{name}“. Siehe /chunkkeeper backup list."
+  confirm-restore: "Die Sicherung {name} enthält {contents}. Chunks, die nicht darin sind, werden freigegeben. Gib zur Bestätigung /chunkkeeper backup restore {name} confirm ein."
+  restored: "{name} wiederhergestellt. {chunks} Einzelchunks und {areas} benannte Bereiche werden geladen gehalten. Der vorherige Stand wurde als {previous} gesichert."
+  failed: "Das hat nicht geklappt: {error}"
 
 worldedit:
   no-selection: "Wähle zuerst mit WorldEdit einen Bereich aus."
