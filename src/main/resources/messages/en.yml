@@ -28,7 +28,7 @@ general:
 describe:
   chunk: "({x}, {z}) in '{world}'"
   rectangle: "chunks ({x1}, {z1}) to ({x2}, {z2}) in '{world}'"
-  worldedit: "your WorldEdit selection in '{world}'"
+  worldedit: "a WorldEdit selection in '{world}'"
   worldguard: "WorldGuard region '{region}' in '{world}'"
   world-singles: "all single chunks in '{world}'"
   railway: "the railway from {x}, {y}, {z} in '{world}'"

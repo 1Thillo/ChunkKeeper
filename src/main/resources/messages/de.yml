@@ -25,14 +25,15 @@ general:
   area-exists-other-name: "Es gibt schon einen Bereich „{name}“. Wähle einen anderen Namen."
   area-unknown: "Es gibt keinen Bereich „{name}“. Siehe /chunkkeeper area list."
 
-# Bausteine, die in andere Meldungen eingesetzt werden
+# Bausteine, die in andere Meldungen eingesetzt werden. Ohne Artikel, weil sie mal nach „aus“
+# oder „in“ stehen und mal nach einem Doppelpunkt.
 describe:
   chunk: "({x}, {z}) in „{world}“"
   rectangle: "Chunks ({x1}, {z1}) bis ({x2}, {z2}) in „{world}“"
-  worldedit: "deine WorldEdit-Auswahl in „{world}“"
+  worldedit: "WorldEdit-Auswahl in „{world}“"
   worldguard: "WorldGuard-Region „{region}“ in „{world}“"
-  world-singles: "alle Einzelchunks in „{world}“"
-  railway: "die Schienenstrecke ab {x}, {y}, {z} in „{world}“"
+  world-singles: "Einzelchunks in „{world}“"
+  railway: "Schienenstrecke ab {x}, {y}, {z} in „{world}“"
 
 help:
   header: "ChunkKeeper-Befehle (auch /keepchunks, /kc, /ck, /chk):"
