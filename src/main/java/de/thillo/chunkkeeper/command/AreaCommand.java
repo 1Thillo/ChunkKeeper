@@ -25,7 +25,7 @@ final class AreaCommand implements Subcommand {
 
     private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "convert", "dissolve");
     private static final String CONVERT_USAGE =
-            "convert <name> (coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world> | world <world>)";
+            "convert <name> (coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world> | world <world>)";
 
     private final ChunkKeeper plugin;
 

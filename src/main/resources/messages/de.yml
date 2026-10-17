@@ -17,6 +17,8 @@ general:
   worldedit-missing: "WorldEdit bzw. FastAsyncWorldEdit ist nicht installiert."
   worldguard-missing: "WorldGuard ist nicht installiert."
   area-too-large: "Der Bereich hat {size} {size|Chunk|Chunks}, mehr als das Limit von {limit} (max-area-chunks in der config.yml)."
+  radius-too-large: "Ein Radius von {radius} ist zu groß: max-area-chunks in der config.yml erlaubt {limit} Chunks, also höchstens Radius {largest}."
+  negative-radius: "Der Radius muss 0 oder größer sein: 0 ist ein Chunk, 1 sind 3 × 3 Chunks, 2 sind 5 × 5."
   name-missing: "Gib nach --name einen Namen an, z. B. --name halloween."
   invalid-name: "„{name}“ ist kein gültiger Bereichsname. Erlaubt sind bis zu 32 Kleinbuchstaben, Ziffern, - und _."
   use-area-release: "Einen benannten Bereich gibst du mit /chunkkeeper area release <name> frei."
@@ -30,6 +32,7 @@ general:
 describe:
   chunk: "({x}, {z}) in „{world}“"
   rectangle: "Chunks ({x1}, {z1}) bis ({x2}, {z2}) in „{world}“"
+  radius: "Umkreis von {radius} {radius|Chunk|Chunks} um ({x}, {z}) in „{world}“"
   worldedit: "WorldEdit-Auswahl in „{world}“"
   worldguard: "WorldGuard-Region „{region}“ in „{world}“"
   world-singles: "Einzelchunks in „{world}“"

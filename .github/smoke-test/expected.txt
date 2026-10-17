@@ -37,6 +37,9 @@ Dissolved area 'block': its 4 chunks are now kept on their own (4 of them were n
 Released 4 of the 4 chunks
 Converted 2 single chunks from all single chunks in 'world' into area 'imported'
 Dissolved area 'imported': its 2 chunks are now kept on their own
+Created area 'around' with 9 chunks from 1 chunk around (70, 70) in 'world' (9 of them were not kept before).
+The radius must be 0 or more
+Released area 'around' (9 chunks).
 Created by: CONSOLE,
 Added on its own by: CONSOLE,
 Saved backup

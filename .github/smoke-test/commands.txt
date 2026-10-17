@@ -46,6 +46,10 @@ chk chunkinfo coords 41 41 world
 chk releaseregion coords 40 40 41 41 world
 chk area convert imported world world
 chk area dissolve imported
+# The chunks around a chunk
+chk keepregion radius 1 70 70 world --name around
+chk keepregion radius -1 70 70 world
+chk area release around
 chk reload
 # Who and when, backups and the history
 chk area info farm
