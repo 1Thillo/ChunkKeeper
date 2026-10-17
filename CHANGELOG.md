@@ -30,6 +30,10 @@ All notable changes to ChunkKeeper are listed here. The format follows
 - The dependency graph sent to GitHub only lists what the plugin jar ships and the Gradle build
   itself, so Dependabot alerts concern ChunkKeeper directly.
 
+### Fixed
+- On the first start the console said "Keeping 0 chunks loaded" before importing the KeepChunks
+  chunks, and did not mention imported chunks of worlds that are not loaded yet.
+
 ## [1.1.0] - 2026-10-12
 
 ### Added

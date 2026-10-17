@@ -55,8 +55,9 @@ public final class ChunkKeeper extends JavaPlugin {
                 settings.backupsToKeep());
 
         store.load();
-        keepAllLoaded();
+        // Import first, so the count below includes the imported chunks.
         imported.ifPresent(this::finishImport);
+        keepAllLoaded();
         if (!store.fileExists()) {
             store.save();
         }
