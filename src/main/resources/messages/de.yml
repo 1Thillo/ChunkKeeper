@@ -1,8 +1,8 @@
 # ChunkKeeper-Meldungen, Deutsch.
 #
 # Hier kann jeder Text geändert werden, danach /chunkkeeper reload. Wörter in {Klammern} setzt das
-# Plugin ein; sie müssen drinbleiben, dürfen aber verschoben werden. Fehlt ein Schlüssel, wird der
-# eingebaute Text verwendet.
+# Plugin ein; sie müssen drinbleiben, dürfen aber verschoben werden. {count|Chunk|Chunks} wird zu
+# „Chunk“, wenn count 1 ist, sonst zu „Chunks“. Fehlt ein Schlüssel, wird der eingebaute Text verwendet.
 
 general:
   yes-word: "ja"
@@ -16,7 +16,7 @@ general:
   players-only: "Das können nur Spieler. In der Konsole nimm stattdessen „coords“."
   worldedit-missing: "WorldEdit bzw. FastAsyncWorldEdit ist nicht installiert."
   worldguard-missing: "WorldGuard ist nicht installiert."
-  area-too-large: "Der Bereich hat {size} Chunks, mehr als das Limit von {limit} (max-area-chunks in der config.yml)."
+  area-too-large: "Der Bereich hat {size} {size|Chunk|Chunks}, mehr als das Limit von {limit} (max-area-chunks in der config.yml)."
   name-missing: "Gib nach --name einen Namen an, z. B. --name halloween."
   invalid-name: "„{name}“ ist kein gültiger Bereichsname. Erlaubt sind bis zu 32 Kleinbuchstaben, Ziffern, - und _."
   use-area-release: "Einen benannten Bereich gibst du mit /chunkkeeper area release <name> frei."
@@ -62,23 +62,23 @@ chunk:
   stays-through-areas: "Er bleibt über die benannten Bereiche {areas} geladen. Einen Bereich gibst du mit /chunkkeeper area release <name> frei."
 
 region:
-  area-created: "Bereich „{name}“ mit {count} Chunks aus {source} angelegt ({new} davon wurden vorher nicht gehalten)."
-  kept: "{added} weitere Chunks werden geladen gehalten ({total} in {area}, {already} wurden schon gehalten)."
-  released: "{removed} von {total} Chunks in {area} freigegeben."
-  still-in-areas: "{count} davon bleiben geladen, weil sie zu benannten Bereichen gehören."
+  area-created: "Bereich „{name}“ mit {count} {count|Chunk|Chunks} aus {source} angelegt ({new} davon {new|wurde|wurden} vorher nicht gehalten)."
+  kept: "{added} {added|weiterer Chunk wird|weitere Chunks werden} geladen gehalten ({total} in {area}, {already} {already|wurde|wurden} schon gehalten)."
+  released: "{removed} von {total} {total|Chunk|Chunks} in {area} freigegeben."
+  still-in-areas: "{count} davon {count|bleibt|bleiben} geladen, weil {count|er|sie} zu benannten Bereichen {count|gehört|gehören}."
 
 rail:
   following: "Verfolge die Schienen ab {x}, {y}, {z} in „{world}“ …"
   no-rail: "An dieser Stelle liegt keine Schiene. Stell dich auf die Strecke oder gib ihre Koordinaten an."
-  limit-hit: "Nach {rails} Schienen abgebrochen (rail-search-limit in der config.yml). Es wird nur der bisher gefundene Teil verwendet."
-  area-created: "{rails} Schienen gefunden. Bereich „{name}“ mit {count} Chunks angelegt ({new} davon wurden vorher nicht gehalten)."
-  kept: "{rails} Schienen gefunden. {added} weitere Chunks werden geladen gehalten ({total} entlang der Strecke, {already} wurden schon gehalten)."
-  released: "{rails} Schienen gefunden. {removed} von {total} Chunks entlang der Strecke freigegeben."
+  limit-hit: "Nach {rails} {rails|Schiene|Schienen} abgebrochen (rail-search-limit in der config.yml). Es wird nur der bisher gefundene Teil verwendet."
+  area-created: "{rails} {rails|Schiene|Schienen} gefunden. Bereich „{name}“ mit {count} {count|Chunk|Chunks} angelegt ({new} davon {new|wurde|wurden} vorher nicht gehalten)."
+  kept: "{rails} {rails|Schiene|Schienen} gefunden. {added} {added|weiterer Chunk wird|weitere Chunks werden} geladen gehalten ({total} entlang der Strecke, {already} {already|wurde|wurden} schon gehalten)."
+  released: "{rails} {rails|Schiene|Schienen} gefunden. {removed} von {total} {total|Chunk|Chunks} entlang der Strecke freigegeben."
 
 area:
   none: "Es gibt keine benannten Bereiche. Lege einen an mit /chunkkeeper keepregion ... --name <name>."
-  list-header: "{count} benannte Bereiche:"
-  list-entry: "{count} Chunks in „{world}“"
+  list-header: "{count} {count|benannter Bereich|benannte Bereiche}:"
+  list-entry: "{count} {count|Chunk|Chunks} in „{world}“"
   info-header: "Bereich „{name}“"
   label-world: "Welt"
   label-chunks: "Chunks"
@@ -86,12 +86,12 @@ area:
   label-span: "Reicht über die Chunks"
   label-created: "Angelegt von"
   span: "({x1}, {z1}) bis ({x2}, {z2})"
-  released: "Bereich „{name}“ freigegeben ({count} Chunks)."
-  still-kept: "{count} seiner Chunks bleiben geladen, weil sie einzeln oder von anderen Bereichen gehalten werden."
+  released: "Bereich „{name}“ freigegeben ({count} {count|Chunk|Chunks})."
+  still-kept: "{count} seiner Chunks {count|bleibt|bleiben} geladen, weil {count|er|sie} einzeln oder von anderen Bereichen gehalten {count|wird|werden}."
   renamed: "Bereich „{old}“ in „{new}“ umbenannt."
   nothing-to-convert: "In {selection} gibt es keine Einzelchunks, also gibt es nichts umzuwandeln. Es wurde kein Bereich angelegt."
-  converted: "{count} Einzelchunks aus {selection} in den Bereich „{name}“ übernommen. Sie blieben die ganze Zeit geladen."
-  dissolved: "Bereich „{name}“ aufgelöst: Seine {count} Chunks werden jetzt einzeln gehalten ({added} davon vorher nicht). Es wurde nichts entladen."
+  converted: "{count} {count|Einzelchunk|Einzelchunks} aus {selection} in den Bereich „{name}“ übernommen. {count|Er blieb|Sie blieben} die ganze Zeit geladen."
+  dissolved: "Bereich „{name}“ aufgelöst: Seine {count} {count|Chunk wird|Chunks werden} jetzt einzeln gehalten ({added} davon vorher nicht). Es wurde nichts entladen."
 
 info:
   area-header: "Bereich: {area}"
@@ -110,27 +110,27 @@ info:
 
 list:
   nothing: "Es werden keine Chunks geladen gehalten."
-  header: "{count} Chunks werden geladen gehalten:"
-  world-entry: "{count} Chunks"
+  header: "{count} {count|Chunk wird|Chunks werden} geladen gehalten:"
+  world-entry: "{count} {count|Chunk|Chunks}"
   details-hint: "Details: /chunkkeeper list <Welt> [Seite]"
   no-singles-in-world: "In der Welt „{world}“ werden keine Einzelchunks gehalten. Benannte Bereiche: /chunkkeeper area list"
-  no-such-page: "Seite {page} gibt es nicht. Es gibt {pages} Seiten."
+  no-such-page: "Seite {page} gibt es nicht. Es gibt {pages} {pages|Seite|Seiten}."
   page-header: "Gehaltene Chunks in „{world}“, Seite {page} von {pages}:"
   chunk-label: "Chunk ({x}, {z})"
   chunk-entry: "Blöcke {x}, {z}"
 
 releaseall:
   console-only: "Das darf nur die Serverkonsole (release-all-console-only in der config.yml)."
-  confirm: "Damit werden alle {chunks} Einzelchunks und alle {areas} benannten Bereiche freigegeben. Gib zur Bestätigung /chunkkeeper releaseall confirm ein."
-  done: "{chunks} Chunks und {areas} benannte Bereiche freigegeben."
+  confirm: "Das gibt {chunks} {chunks|Einzelchunk|Einzelchunks} und {areas} {areas|benannten Bereich|benannte Bereiche} frei. Gib zur Bestätigung /chunkkeeper releaseall confirm ein."
+  done: "{chunks} {chunks|Chunk|Chunks} und {areas} {areas|benannter Bereich|benannte Bereiche} freigegeben."
 
 reload:
-  done: "Neu geladen. {chunks} Einzelchunks und {areas} benannte Bereiche werden geladen gehalten."
+  done: "Neu geladen. {chunks} {chunks|Einzelchunk|Einzelchunks} und {areas} {areas|benannter Bereich|benannte Bereiche} werden geladen gehalten."
 
 import:
   no-file: "Es gibt keine {file} zum Übernehmen."
-  done: "{found} Chunks in der data.yml von KeepChunks gefunden, {added} davon waren neu."
-  unreadable: "{count} Einträge konnten nicht gelesen werden; Details in der Konsole."
+  done: "{found} {found|Chunk|Chunks} in der data.yml von KeepChunks gefunden, {added} davon {added|war|waren} neu."
+  unreadable: "{count} {count|Eintrag konnte|Einträge konnten} nicht gelesen werden; Details in der Konsole."
 
 version:
   plugin: "ChunkKeeper v{version}"
@@ -146,28 +146,28 @@ history:
   empty: "Bisher wurde nichts aufgezeichnet."
   kept-chunk: "Chunk {chunk} gehalten"
   released-chunk: "Chunk {chunk} freigegeben"
-  kept-chunks: "{count} Chunks gehalten: {area}"
-  released-chunks: "{count} Chunks freigegeben: {area}"
-  area-created: "Bereich „{name}“ mit {count} Chunks angelegt aus {source}"
-  area-released: "Bereich „{name}“ freigegeben ({count} Chunks)"
+  kept-chunks: "{count} {count|Chunk|Chunks} gehalten: {area}"
+  released-chunks: "{count} {count|Chunk|Chunks} freigegeben: {area}"
+  area-created: "Bereich „{name}“ mit {count} {count|Chunk|Chunks} angelegt aus {source}"
+  area-released: "Bereich „{name}“ freigegeben ({count} {count|Chunk|Chunks})"
   area-renamed: "Bereich „{old}“ in „{new}“ umbenannt"
-  area-converted: "{count} Einzelchunks in den Bereich „{name}“ übernommen"
-  area-dissolved: "Bereich „{name}“ aufgelöst ({count} Chunks)"
-  released-all: "alles freigegeben: {chunks} Chunks und {areas} benannte Bereiche"
-  imported: "{count} Chunks aus KeepChunks übernommen"
+  area-converted: "{count} {count|Einzelchunk|Einzelchunks} in den Bereich „{name}“ übernommen"
+  area-dissolved: "Bereich „{name}“ aufgelöst ({count} {count|Chunk|Chunks})"
+  released-all: "alles freigegeben: {chunks} {chunks|Chunk|Chunks} und {areas} {areas|benannter Bereich|benannte Bereiche}"
+  imported: "{count} {count|Chunk|Chunks} aus KeepChunks übernommen"
   backup-created: "Sicherung {name} angelegt"
   backup-restored: "Sicherung {name} wiederhergestellt"
 
 backup:
   none: "Es gibt noch keine Sicherungen. Sie entstehen vor releaseall, import und restore oder mit /chunkkeeper backup create."
-  list-header: "{count} Sicherungen, neueste zuerst:"
-  contents: "{chunks} Einzelchunks, {areas} benannte Bereiche"
+  list-header: "{count} {count|Sicherung|Sicherungen}, neueste zuerst:"
+  contents: "{chunks} {chunks|Einzelchunk|Einzelchunks}, {areas} {areas|benannter Bereich|benannte Bereiche}"
   nothing-to-save: "Es gibt noch keine chunks.yml zum Sichern."
   created: "Sicherung {name} angelegt."
   automatic: "Vorher gesichert: {name} (rückgängig mit /chunkkeeper backup restore {name})."
   unknown: "Es gibt keine Sicherung „{name}“. Siehe /chunkkeeper backup list."
   confirm-restore: "Die Sicherung {name} enthält {contents}. Chunks, die nicht darin sind, werden freigegeben. Gib zur Bestätigung /chunkkeeper backup restore {name} confirm ein."
-  restored: "{name} wiederhergestellt. {chunks} Einzelchunks und {areas} benannte Bereiche werden geladen gehalten. Der vorherige Stand wurde als {previous} gesichert."
+  restored: "{name} wiederhergestellt. {chunks} {chunks|Einzelchunk|Einzelchunks} und {areas} {areas|benannter Bereich|benannte Bereiche} werden geladen gehalten. Der vorherige Stand wurde als {previous} gesichert."
   failed: "Das hat nicht geklappt: {error}"
 
 worldedit:
