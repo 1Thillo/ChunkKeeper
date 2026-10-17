@@ -35,6 +35,8 @@ class KeeperTest {
         }
     }
 
+    private static final Origin TESTER = Origin.now("tester");
+
     private static final KeptChunk A = new KeptChunk("w", 0, 0);
     private static final KeptChunk B = new KeptChunk("w", 1, 0);
     private static final KeptChunk C = new KeptChunk("w", 2, 0);
@@ -54,12 +56,12 @@ class KeeperTest {
     }
 
     private static NamedArea area(String name, KeptChunk... chunks) {
-        return new NamedArea(name, "w", Set.of(chunks), "test");
+        return new NamedArea(name, "w", Set.of(chunks), "test", TESTER);
     }
 
     @Test
     void releasingASingleChunkKeepsItLoadedWhileAnAreaHasIt() {
-        keeper.keep(List.of(A));
+        keeper.keep(List.of(A), TESTER);
         keeper.createArea(area("farm", A, B));
         assertEquals(1, keeper.release(List.of(A)));
         assertTrue(loader.forced.contains(A));
@@ -68,7 +70,7 @@ class KeeperTest {
 
     @Test
     void releasingAnAreaKeepsSingleChunksLoaded() {
-        keeper.keep(List.of(A));
+        keeper.keep(List.of(A), TESTER);
         keeper.createArea(area("farm", A, B));
         Optional<Keeper.AreaRelease> released = keeper.releaseArea("farm");
         assertEquals(1, released.orElseThrow().unloaded());
@@ -108,10 +110,10 @@ class KeeperTest {
 
     @Test
     void convertMovesOnlySingleChunksAndUnloadsNothing() {
-        keeper.keep(List.of(A, B));
+        keeper.keep(List.of(A, B), TESTER);
         Set<KeptChunk> forcedBefore = Set.copyOf(loader.forced);
         // the selection also covers C, which is not kept, so it must not end up in the area
-        assertEquals(Optional.of(2), keeper.convertToArea("block", "w", List.of(A, B, C), "test"));
+        assertEquals(Optional.of(2), keeper.convertToArea("block", "w", List.of(A, B, C), "test", TESTER));
         assertEquals(Set.of(A, B), store.area("block").orElseThrow().chunks());
         assertTrue(store.all().isEmpty());
         assertEquals(forcedBefore, loader.forced);
@@ -119,33 +121,49 @@ class KeeperTest {
 
     @Test
     void convertWithNothingToMoveMakesNoArea() {
-        assertEquals(Optional.of(0), keeper.convertToArea("empty", "w", List.of(A), "test"));
+        assertEquals(Optional.of(0), keeper.convertToArea("empty", "w", List.of(A), "test", TESTER));
         assertTrue(store.area("empty").isEmpty());
     }
 
     @Test
     void convertRefusesATakenName() {
-        keeper.keep(List.of(A));
+        keeper.keep(List.of(A), TESTER);
         keeper.createArea(area("farm", B));
-        assertEquals(Optional.empty(), keeper.convertToArea("farm", "w", List.of(A), "test"));
+        assertEquals(Optional.empty(), keeper.convertToArea("farm", "w", List.of(A), "test", TESTER));
         assertTrue(store.contains(A));
     }
 
     @Test
     void dissolveTurnsTheAreaIntoSingleChunksAndUnloadsNothing() {
-        keeper.keep(List.of(A));
+        keeper.keep(List.of(A), TESTER);
         keeper.createArea(area("farm", A, B));
         Set<KeptChunk> forcedBefore = Set.copyOf(loader.forced);
-        assertEquals(Optional.of(1), keeper.dissolveArea("farm"));
+        assertEquals(Optional.of(1), keeper.dissolveArea("farm", TESTER));
         assertEquals(Set.of(A, B), store.all());
         assertTrue(store.area("farm").isEmpty());
         assertEquals(forcedBefore, loader.forced);
-        assertEquals(Optional.empty(), keeper.dissolveArea("farm"));
+        assertEquals(Optional.empty(), keeper.dissolveArea("farm", TESTER));
+    }
+
+    @Test
+    void dissolvedChunksGetTheDissolverUnlessTheyWereKeptOnTheirOwnAlready() {
+        keeper.keep(List.of(A), Origin.now("first"));
+        keeper.createArea(area("farm", A, B));
+        keeper.dissolveArea("farm", Origin.now("dissolver"));
+        assertEquals("first", store.origin(A).orElseThrow().by());
+        assertEquals("dissolver", store.origin(B).orElseThrow().by());
+    }
+
+    @Test
+    void convertedAreaRemembersWhoConvertedIt() {
+        keeper.keep(List.of(A), TESTER);
+        keeper.convertToArea("block", "w", List.of(A), "test", Origin.now("converter"));
+        assertEquals("converter", store.area("block").orElseThrow().origin().by());
     }
 
     @Test
     void releaseAllClearsEverything() {
-        keeper.keep(List.of(A));
+        keeper.keep(List.of(A), TESTER);
         keeper.createArea(area("farm", B, C));
         Keeper.ReleaseAll released = keeper.releaseAll();
         assertEquals(new Keeper.ReleaseAll(1, 1), released);
@@ -157,7 +175,7 @@ class KeeperTest {
     void keepingAChunkAnAreaAlreadyLoadsDoesNotLoadItTwice() {
         keeper.createArea(area("farm", A));
         loader.forced.clear();
-        assertEquals(1, keeper.keep(List.of(A)));
+        assertEquals(1, keeper.keep(List.of(A), TESTER));
         assertFalse(loader.forced.contains(A), "already force-loaded through the area, no second request");
     }
 }

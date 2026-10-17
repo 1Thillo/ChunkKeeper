@@ -41,6 +41,7 @@ final class ReleaseAllCommand implements Subcommand {
         }
         Keeper.ReleaseAll released = plugin.keeper().releaseAll();
         Messages.success(sender, "releaseall.done", "chunks", released.chunks(), "areas", released.areas());
+        plugin.recordChange(sender, "history.released-all", "chunks", released.chunks(), "areas", released.areas());
     }
 
     @Override

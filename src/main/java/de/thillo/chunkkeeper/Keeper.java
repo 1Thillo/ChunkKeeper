@@ -30,12 +30,12 @@ public final class Keeper {
     }
 
     /** Keeps chunks on their own. @return how many of them were not kept on their own before */
-    public synchronized int keep(Collection<KeptChunk> chunks) {
+    public synchronized int keep(Collection<KeptChunk> chunks, Origin origin) {
         List<KeptChunk> nowLoaded = new ArrayList<>();
         int added = 0;
         for (KeptChunk chunk : chunks) {
             boolean wasKept = store.isKept(chunk);
-            if (store.add(chunk)) {
+            if (store.add(chunk, origin)) {
                 added++;
                 if (!wasKept) {
                     nowLoaded.add(chunk);
@@ -111,7 +111,8 @@ public final class Keeper {
      * @return how many chunks were moved into the area (0 means nothing to convert and no area was
      *         made), or empty if the name is taken
      */
-    public synchronized Optional<Integer> convertToArea(String name, String world, Collection<KeptChunk> selection, String source) {
+    public synchronized Optional<Integer> convertToArea(String name, String world, Collection<KeptChunk> selection,
+            String source, Origin origin) {
         if (store.area(name).isPresent()) {
             return Optional.empty();
         }
@@ -125,7 +126,7 @@ public final class Keeper {
             return Optional.of(0);
         }
         // add the area before removing the single chunks, so the chunks are never "not kept"
-        store.addArea(new NamedArea(name, world, singles, source));
+        store.addArea(new NamedArea(name, world, singles, source, origin));
         for (KeptChunk chunk : singles) {
             store.remove(chunk);
         }
@@ -138,14 +139,14 @@ public final class Keeper {
      *
      * @return how many of its chunks were not kept on their own before, or empty if there is no such area
      */
-    public synchronized Optional<Integer> dissolveArea(String name) {
+    public synchronized Optional<Integer> dissolveArea(String name, Origin origin) {
         Optional<NamedArea> area = store.area(name);
         if (area.isEmpty()) {
             return Optional.empty();
         }
         int added = 0;
         for (KeptChunk chunk : area.get().chunks()) {
-            if (store.add(chunk)) {
+            if (store.add(chunk, origin)) {
                 added++;
             }
         }
@@ -161,8 +162,7 @@ public final class Keeper {
             return false;
         }
         store.removeArea(oldName);
-        NamedArea old = area.get();
-        store.addArea(new NamedArea(newName, old.world(), old.chunks(), old.source()));
+        store.addArea(area.get().renamed(newName));
         store.save();
         return true;
     }

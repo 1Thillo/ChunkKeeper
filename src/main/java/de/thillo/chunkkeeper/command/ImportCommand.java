@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.Origin;
 import de.thillo.chunkkeeper.importer.KeepChunksImporter;
 
 /**
@@ -39,8 +40,9 @@ final class ImportCommand implements Subcommand {
             Messages.error(sender, "import.no-file", "file", importer.dataFile().getPath());
             return;
         }
-        int added = plugin.keeper().keep(result.get().chunks());
+        int added = plugin.keeper().keep(result.get().chunks(), Origin.now(sender.getName() + " (KeepChunks import)"));
         Messages.success(sender, "import.done", "found", result.get().chunks().size(), "added", added);
+        plugin.recordChange(sender, "history.imported", "count", added);
         if (!result.get().unreadable().isEmpty()) {
             Messages.error(sender, "import.unreadable", "count", result.get().unreadable().size());
             plugin.getLogger().warning("Unreadable KeepChunks entries: " + result.get().unreadable());
