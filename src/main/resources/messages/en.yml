@@ -47,7 +47,7 @@ help:
   list: "Show the kept chunks."
   chunkinfo: "Show whether a chunk or an area is kept loaded."
   reload: "Reload config.yml, chunks.yml and the messages."
-  import: "Add the chunks from KeepChunks' data.yml."
+  import: "Take over the chunks from KeepChunks' data.yml or from the vanilla /forceload command."
   version: "Show the plugin and server version."
   history: "Show who changed what and when."
   backup: "List, make and restore backups of chunks.yml."
@@ -105,7 +105,7 @@ info:
   label-force-loaded: "Force-loaded"
   label-loaded: "Loaded right now"
   not-force-loaded-yet: "The chunk is kept but not force-loaded yet; this fixes itself within a moment or after /chunkkeeper reload."
-  forced-by-something-else: "Something else force-loads this chunk, for example the vanilla /forceload command."
+  forced-by-something-else: "Something else force-loads this chunk, for example the vanilla /forceload command. /chunkkeeper import forceload takes such chunks over."
 
 list:
   nothing: "No chunks are kept loaded."
@@ -130,6 +130,9 @@ import:
   no-file: "There is no {file} to import from."
   done: "Found {found} {found|chunk|chunks} in KeepChunks' data.yml, {added} of them {added|was|were} new."
   unreadable: "{count} {count|entry|entries} could not be read; see the console."
+  forceload-none: "There are no chunks force-loaded with /forceload."
+  forceload-nothing: "ChunkKeeper already keeps every force-loaded chunk ({found})."
+  forceload-done: "Took over {added} {added|chunk|chunks} force-loaded with /forceload; ChunkKeeper keeps {added|it|them} on its own now ({already} {already|was|were} kept already)."
 
 version:
   plugin: "ChunkKeeper v{version}"
@@ -154,6 +157,7 @@ history:
   area-dissolved: "dissolved area '{name}' ({count} {count|chunk|chunks})"
   released-all: "released all: {chunks} {chunks|chunk|chunks} and {areas} named {areas|area|areas}"
   imported: "imported {count} {count|chunk|chunks} from KeepChunks"
+  imported-forceload: "took over {count} {count|chunk|chunks} from /forceload"
   backup-created: "made backup {name}"
   backup-restored: "restored backup {name}"
 
