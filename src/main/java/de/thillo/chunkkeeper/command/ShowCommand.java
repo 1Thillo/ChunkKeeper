@@ -36,10 +36,12 @@ final class ShowCommand implements Subcommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        Optional<Player> player = Arguments.player(sender);
-        if (player.isEmpty()) {
+        if (!(sender instanceof Player)) {
+            // the console has no position and cannot see particles; chunkinfo and list work there
+            Messages.error(sender, "show.players-only");
             return;
         }
+        Optional<Player> player = Optional.of((Player) sender);
         BorderView view = plugin.borderView();
         int largest = plugin.settings().showMaxRadius();
         if (args.length == 0 && view.isShowing(player.get()) || args.length == 1 && args[0].equalsIgnoreCase("off")) {

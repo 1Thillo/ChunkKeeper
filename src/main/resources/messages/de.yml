@@ -129,6 +129,7 @@ show:
   ended: "Anzeige der gehaltenen Chunks beendet. /chunkkeeper show zeigt sie erneut an."
   nothing-near: "Im Umkreis von {radius} {radius|Chunk|Chunks} um dich werden gerade keine Chunks gehalten."
   radius-out-of-range: "Der Radius muss zwischen 0 und {largest} liegen (show-max-radius in der config.yml)."
+  players-only: "Nur Spieler sehen die Partikel. In der Konsole helfen /chunkkeeper list oder chunkinfo."
 
 releaseall:
   console-only: "Das darf nur die Serverkonsole (release-all-console-only in der config.yml)."
