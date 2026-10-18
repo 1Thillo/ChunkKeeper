@@ -50,6 +50,7 @@ help:
   releaseall: "Alle gehaltenen Chunks freigeben."
   list: "Die gehaltenen Chunks anzeigen."
   chunkinfo: "Anzeigen, ob ein Chunk oder Bereich geladen gehalten wird."
+  show: "Die gehaltenen Chunks um dich herum mit Partikeln anzeigen."
   reload: "config.yml, chunks.yml und die Meldungen neu laden."
   import: "Chunks aus der data.yml von KeepChunks oder vom Vanilla-Befehl /forceload übernehmen."
   version: "Plugin- und Serverversion anzeigen."
@@ -121,6 +122,13 @@ list:
   page-header: "Gehaltene Chunks in „{world}“, Seite {page} von {pages}:"
   chunk-label: "Chunk ({x}, {z})"
   chunk-entry: "Blöcke {x}, {z}"
+
+show:
+  started: "Die gehaltenen Chunks im Umkreis von {radius} {radius|Chunk|Chunks} werden {seconds} Sekunden lang angezeigt: Grüne Linien sind Einzelchunks, blaue benannte Bereiche. Nochmal /chunkkeeper show schaltet es aus."
+  stopped: "Die gehaltenen Chunks werden nicht mehr angezeigt."
+  ended: "Anzeige der gehaltenen Chunks beendet. /chunkkeeper show zeigt sie erneut an."
+  nothing-near: "Im Umkreis von {radius} {radius|Chunk|Chunks} um dich werden gerade keine Chunks gehalten."
+  radius-out-of-range: "Der Radius muss zwischen 0 und {largest} liegen (show-max-radius in der config.yml)."
 
 releaseall:
   console-only: "Das darf nur die Serverkonsole (release-all-console-only in der config.yml)."

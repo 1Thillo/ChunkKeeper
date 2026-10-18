@@ -62,6 +62,7 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `area dissolve <name>` | Turn a named area back into single chunks |
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
+| `show [<radius> \| off]` | Draw the outline of the kept chunks around you with particles for 30 seconds (green: single chunks, blue: named areas) |
 | `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
 | `import [keepchunks]` | Add the chunks from KeepChunks' `data.yml` again |
 | `import forceload [<world>]` | Take over the chunks force-loaded with the vanilla `/forceload` command |
@@ -138,6 +139,7 @@ Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
 | `language` | `auto` | `auto` = each player's Minecraft language, or a fixed language such as `de` or `en` |
 | `console-language` | `en` | Language of the console when `language` is `auto` |
 | `backups-to-keep` | `20` | How many backups of `chunks.yml` are kept |
+| `show-max-radius` | `16` | The largest radius for `/chunkkeeper show`; more means more particles |
 
 The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`: single chunks under `chunks`
 (`x,z,world`, with who added them and when) and named areas under `areas`.

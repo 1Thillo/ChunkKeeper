@@ -23,6 +23,7 @@ permissions:
       chunkkeeper.version: true
       chunkkeeper.list: true
       chunkkeeper.chunkinfo: true
+      chunkkeeper.show: true
       chunkkeeper.reload: true
       chunkkeeper.import: true
       chunkkeeper.history: true
@@ -42,6 +43,8 @@ permissions:
   chunkkeeper.list:
     default: op
   chunkkeeper.chunkinfo:
+    default: op
+  chunkkeeper.show:
     default: op
   chunkkeeper.reload:
     default: op

@@ -49,6 +49,7 @@ help:
   releaseall: "Stop keeping any chunk loaded."
   list: "Show the kept chunks."
   chunkinfo: "Show whether a chunk or an area is kept loaded."
+  show: "Show the kept chunks around you with particles."
   reload: "Reload config.yml, chunks.yml and the messages."
   import: "Take over the chunks from KeepChunks' data.yml or from the vanilla /forceload command."
   version: "Show the plugin and server version."
@@ -120,6 +121,13 @@ list:
   page-header: "Kept chunks in '{world}', page {page} of {pages}:"
   chunk-label: "Chunk ({x}, {z})"
   chunk-entry: "blocks {x}, {z}"
+
+show:
+  started: "Showing the kept chunks within {radius} {radius|chunk|chunks} for {seconds} seconds: green lines are single chunks, blue lines named areas. /chunkkeeper show again turns it off."
+  stopped: "No longer showing the kept chunks."
+  ended: "Stopped showing the kept chunks. /chunkkeeper show shows them again."
+  nothing-near: "There are no kept chunks within {radius} {radius|chunk|chunks} of you right now."
+  radius-out-of-range: "The radius has to be between 0 and {largest} (show-max-radius in config.yml)."
 
 releaseall:
   console-only: "Only the server console may do that (release-all-console-only in config.yml)."

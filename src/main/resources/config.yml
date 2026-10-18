@@ -29,3 +29,7 @@ max-area-chunks: 10000
 # Before releaseall, import and restoring a backup, ChunkKeeper copies chunks.yml to
 # plugins/ChunkKeeper/backups/. This many of the newest copies are kept.
 backups-to-keep: 20
+
+# "/chunkkeeper show" draws kept chunks up to this many chunks around the player. A larger radius
+# means more particles for the player's client.
+show-max-radius: 16
