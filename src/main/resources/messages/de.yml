@@ -48,7 +48,7 @@ help:
   list: "Die gehaltenen Chunks anzeigen."
   chunkinfo: "Anzeigen, ob ein Chunk oder Bereich geladen gehalten wird."
   reload: "config.yml, chunks.yml und die Meldungen neu laden."
-  import: "Die Chunks aus der data.yml von KeepChunks übernehmen."
+  import: "Chunks aus der data.yml von KeepChunks oder vom Vanilla-Befehl /forceload übernehmen."
   version: "Plugin- und Serverversion anzeigen."
   history: "Anzeigen, wer wann was geändert hat."
   backup: "Sicherungen der chunks.yml anzeigen, anlegen und wiederherstellen."
@@ -106,7 +106,7 @@ info:
   label-force-loaded: "Dauerhaft geladen (force-loaded)"
   label-loaded: "Gerade geladen"
   not-force-loaded-yet: "Der Chunk wird gehalten, ist aber noch nicht dauerhaft geladen; das erledigt sich gleich von selbst oder nach /chunkkeeper reload."
-  forced-by-something-else: "Etwas anderes hält diesen Chunk dauerhaft geladen, zum Beispiel der Vanilla-Befehl /forceload."
+  forced-by-something-else: "Etwas anderes hält diesen Chunk dauerhaft geladen, zum Beispiel der Vanilla-Befehl /forceload. /chunkkeeper import forceload übernimmt solche Chunks."
 
 list:
   nothing: "Es werden keine Chunks geladen gehalten."
@@ -131,6 +131,9 @@ import:
   no-file: "Es gibt keine {file} zum Übernehmen."
   done: "{found} {found|Chunk|Chunks} in der data.yml von KeepChunks gefunden, {added} davon {added|war|waren} neu."
   unreadable: "{count} {count|Eintrag konnte|Einträge konnten} nicht gelesen werden; Details in der Konsole."
+  forceload-none: "Es gibt keine mit /forceload geladenen Chunks."
+  forceload-nothing: "ChunkKeeper hält schon alle mit /forceload geladenen Chunks ({found})."
+  forceload-done: "{added} {added|mit /forceload geladener Chunk|mit /forceload geladene Chunks} übernommen; ChunkKeeper hält {added|ihn|sie} jetzt einzeln ({already} {already|wurde|wurden} schon gehalten)."
 
 version:
   plugin: "ChunkKeeper v{version}"
@@ -155,6 +158,7 @@ history:
   area-dissolved: "Bereich „{name}“ aufgelöst ({count} {count|Chunk|Chunks})"
   released-all: "alles freigegeben: {chunks} {chunks|Chunk|Chunks} und {areas} {areas|benannter Bereich|benannte Bereiche}"
   imported: "{count} {count|Chunk|Chunks} aus KeepChunks übernommen"
+  imported-forceload: "{count} {count|Chunk|Chunks} von /forceload übernommen"
   backup-created: "Sicherung {name} angelegt"
   backup-restored: "Sicherung {name} wiederhergestellt"
 

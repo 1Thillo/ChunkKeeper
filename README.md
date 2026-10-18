@@ -62,7 +62,8 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
 | `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
-| `import` | Add the chunks from KeepChunks' `data.yml` again |
+| `import [keepchunks]` | Add the chunks from KeepChunks' `data.yml` again |
+| `import forceload [<world>]` | Take over the chunks force-loaded with the vanilla `/forceload` command |
 | `history [page]` | Who changed what and when, newest first |
 | `backup list` | The backups of `chunks.yml` and what they hold |
 | `backup create` | Make a backup now |

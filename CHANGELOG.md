@@ -6,6 +6,11 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `/chunkkeeper import forceload [world]` takes over chunks that were force-loaded with the vanilla
+  `/forceload` command, so ChunkKeeper lists them and releases them like its own. `import keepchunks`
+  is the old `import`, which still works without a word after it.
+
 ### Changed
 - Message files in `plugins/ChunkKeeper/messages/` that nobody edited get the texts of each new
   version. Edited files stay as they are; the new texts are put next to them as `en.yml.new`.

@@ -53,6 +53,12 @@ chk chunkinfo coords 10 10 world
 chk backup create
 chk backup list
 chk backup restore nope
+# Take over a chunk from the vanilla /forceload command
+minecraft:forceload add 800 800
+wait 3
+chk import forceload world
+chk import forceload
+chk releasechunk coords 50 50 world
 chk releaseall confirm
 chk list
 chk history
