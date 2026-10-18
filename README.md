@@ -46,6 +46,7 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `keepchunk coords <x> <z> <world>` | Keep one chunk loaded |
 | `releasechunk current \| coords <x> <z> <world>` | Stop keeping one chunk loaded |
 | `keepregion coords <x1> <z1> <x2> <z2> <world>` | Keep all chunks between two corners loaded |
+| `keepregion radius <r> [<x> <z> <world>]` | Keep the chunks around you (or around a chunk) loaded: radius 1 is 3 x 3 chunks, 2 is 5 x 5 |
 | `keepregion worldedit` | Keep every chunk touched by your WorldEdit selection loaded |
 | `keepregion worldguard <region> <world>` | Keep every chunk touched by a WorldGuard region loaded |
 | `keepregion ... --name <name>` | The same, but as a named area (see below) |
@@ -57,7 +58,7 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `area info <name>` | World, size and origin of a named area |
 | `area release <name>` | Release a named area |
 | `area rename <name> <new name>` | Rename a named area |
-| `area convert <name> (coords ... \| worldedit \| worldguard <region> <world> \| world <world>)` | Turn the single chunks inside a selection into a named area |
+| `area convert <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world> \| world <world>)` | Turn the single chunks inside a selection into a named area |
 | `area dissolve <name>` | Turn a named area back into single chunks |
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |

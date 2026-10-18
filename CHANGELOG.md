@@ -7,6 +7,8 @@ All notable changes to ChunkKeeper are listed here. The format follows
 ## [Unreleased]
 
 ### Added
+- `radius <r> [<x> <z> <world>]` selects the chunks around you or around a chunk, wherever an area is
+  expected: `keepregion radius 2 --name farm` keeps 5 x 5 chunks. Radius 0 is one chunk, 1 is 3 x 3.
 - `/chunkkeeper import forceload [world]` takes over chunks that were force-loaded with the vanilla
   `/forceload` command, so ChunkKeeper lists them and releases them like its own. `import keepchunks`
   is the old `import`, which still works without a word after it.

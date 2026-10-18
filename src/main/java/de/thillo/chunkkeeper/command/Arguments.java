@@ -20,7 +20,8 @@ import de.thillo.chunkkeeper.NamedArea;
 final class Arguments {
 
     static final String CHUNK_USAGE = "(current | coords <x> <z> <world>)";
-    static final String AREA_USAGE = "(coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world>)";
+    static final String AREA_USAGE =
+            "(coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world>)";
 
     private Arguments() {
     }
@@ -103,6 +104,9 @@ final class Arguments {
             return world(sender, args[5]).map(world ->
                     Area.rectangle(world.getName(), numbers.get(0), numbers.get(1), numbers.get(2), numbers.get(3)));
         }
+        if (mode.equals("radius") && (args.length == 2 || args.length == 5)) {
+            return radius(plugin, sender, args);
+        }
         if (mode.equals("worldedit") && args.length == 1) {
             Optional<Player> player = player(sender);
             if (player.isEmpty()) {
@@ -126,6 +130,31 @@ final class Arguments {
         return Optional.empty();
     }
 
+    /**
+     * Reads {@code radius <r>} around the chunk the player stands in, or {@code radius <r> <x> <z> <world>}
+     * around the given chunk.
+     */
+    private static Optional<Area> radius(ChunkKeeper plugin, CommandSender sender, String[] args) {
+        Optional<Integer> radius = integer(sender, args[1]);
+        if (radius.isEmpty()) {
+            return Optional.empty();
+        }
+        if (radius.get() < 0) {
+            Messages.error(sender, "general.negative-radius");
+            return Optional.empty();
+        }
+        int limit = plugin.settings().maxAreaChunks();
+        int largest = Area.largestRadius(limit);
+        if (radius.get() > largest) {
+            Messages.error(sender, "general.radius-too-large", "radius", radius.get(), "limit", limit, "largest", largest);
+            return Optional.empty();
+        }
+        Optional<KeptChunk> center = args.length == 2
+                ? player(sender).map(player -> KeptChunk.of(player.getChunk()))
+                : chunk(sender, new String[] {"coords", args[2], args[3], args[4]}, "");
+        return center.map(chunk -> Area.around(chunk.world(), chunk.x(), chunk.z(), radius.get()));
+    }
+
     private static void tooLarge(CommandSender sender, long size, int limit) {
         Messages.error(sender, "general.area-too-large", "size", size, "limit", limit);
     }
@@ -133,7 +162,7 @@ final class Arguments {
     /** Tab completion for the area modes. */
     static List<String> areaSuggestions(ChunkKeeper plugin, CommandSender sender, String[] args) {
         if (args.length == 1) {
-            List<String> modes = new ArrayList<>(List.of("coords"));
+            List<String> modes = new ArrayList<>(List.of("coords", "radius"));
             plugin.hooks().worldEdit().ifPresent(hook -> modes.add("worldedit"));
             plugin.hooks().worldGuard().ifPresent(hook -> modes.add("worldguard"));
             return modes;
@@ -141,6 +170,9 @@ final class Arguments {
         String mode = args[0].toLowerCase();
         if (mode.equals("coords")) {
             return coordSuggestions(sender, "xzxzw", args.length - 1);
+        }
+        if (mode.equals("radius")) {
+            return args.length == 2 ? List.of("1", "2", "3") : coordSuggestions(sender, "rxzw", args.length - 1);
         }
         if (mode.equals("worldguard") && plugin.hooks().worldGuard().isPresent()) {
             if (args.length == 2) {

@@ -31,7 +31,7 @@ final class ChunkInfoCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return "(current | coords <x> <z> <world> | coords <x1> <z1> <x2> <z2> <world> | worldedit | worldguard <region> <world>)";
+        return "(current | coords <x> <z> <world> | coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world>)";
     }
 
 
@@ -49,7 +49,7 @@ final class ChunkInfoCommand implements Subcommand {
             return false;
         }
         String mode = args[0].toLowerCase();
-        return mode.equals("worldedit") || mode.equals("worldguard") || (mode.equals("coords") && args.length == 6);
+        return mode.equals("worldedit") || mode.equals("worldguard") || mode.equals("radius") || (mode.equals("coords") && args.length == 6);
     }
 
     private void areaInfo(CommandSender sender, String[] args) {
