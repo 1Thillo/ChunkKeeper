@@ -5,6 +5,8 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,6 +18,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public final class Translations {
 
     public static final String FALLBACK = "en";
+
+    /** {name|singular|plural}, for example {count|chunk|chunks} */
+    private static final Pattern PLURAL = Pattern.compile("\\{([a-z0-9]+)\\|([^|{}]*)\\|([^|{}]*)}");
 
     /** language code (en, de, ...) -> message key -> text with {placeholders} */
     private final Map<String, Map<String, String>> languages;
@@ -62,12 +67,24 @@ public final class Translations {
         if (template == null) {
             template = texts(FALLBACK).getOrDefault(text.key(), text.key());
         }
-        String result = template;
+        String result = choosePluralForms(template, text.placeholders());
         for (Map.Entry<String, Object> placeholder : text.placeholders().entrySet()) {
             Object value = placeholder.getValue();
             String rendered = value instanceof Text nested ? format(language, nested) : String.valueOf(value);
             result = result.replace("{" + placeholder.getKey() + "}", rendered);
         }
         return result;
+    }
+
+    /**
+     * Replaces {@code {count|chunk|chunks}} with "chunk" if the placeholder count is 1 and with
+     * "chunks" otherwise. English and German only know these two forms.
+     */
+    private static String choosePluralForms(String template, Map<String, Object> placeholders) {
+        return PLURAL.matcher(template).replaceAll(match -> {
+            Object value = placeholders.get(match.group(1));
+            boolean one = value instanceof Number number && number.doubleValue() == 1;
+            return Matcher.quoteReplacement(one ? match.group(2) : match.group(3));
+        });
     }
 }

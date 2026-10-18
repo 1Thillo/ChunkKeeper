@@ -6,6 +6,10 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- Messages use the singular for one thing: "1 chunk", "1 named area" instead of "1 chunks",
+  "1 named areas". Message files can do this with `{count|chunk|chunks}`.
+
 ## [1.2.0] - 2026-10-17
 
 ### Added

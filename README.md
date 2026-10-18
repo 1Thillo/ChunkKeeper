@@ -110,7 +110,8 @@ it, otherwise in English. English and German are built in; the console uses `con
 `language: de` (or `en`) gives everyone the same language.
 
 The texts are in `plugins/ChunkKeeper/messages/en.yml` and `de.yml`. Change any of them and run
-`/chunkkeeper reload`; words in `{braces}` are filled in by the plugin. For another language, copy
+`/chunkkeeper reload`; words in `{braces}` are filled in by the plugin, and `{count|chunk|chunks}`
+becomes "chunk" when count is 1 and "chunks" otherwise. For another language, copy
 `en.yml` to e.g. `fr.yml` and translate it; players with a French client then get it.
 
 ## Permissions

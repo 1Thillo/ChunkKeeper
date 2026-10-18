@@ -14,8 +14,8 @@ Released 6 of the 6 chunks
 more than the limit of 10000
 Found 51 rails. Keeping 21 more chunks loaded
 Found 51 rails. Released 21 of the 21 chunks
-Reloaded. 2 single chunks and 1 named areas are kept loaded.
-Released 2 chunks and 1 named areas.
+Reloaded. 2 single chunks and 1 named area are kept loaded.
+Released 2 chunks and 1 named area.
 No chunks are kept loaded.
 Created area 'testarea' with 4 chunks
 It stays loaded through the named area(s) testarea
@@ -40,9 +40,9 @@ Dissolved area 'imported': its 2 chunks are now kept on their own
 Created by: CONSOLE,
 Added on its own by: CONSOLE,
 Saved backup
-backups, newest first:
+1 backup, newest first:
 There is no backup called 'nope'
 Saved a backup first:
 Changes, newest first
-| CONSOLE | released all: 2 chunks and 1 named areas
+| CONSOLE | released all: 2 chunks and 1 named area
 | CONSOLE | made backup
