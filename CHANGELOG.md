@@ -6,6 +6,10 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- Message files in `plugins/ChunkKeeper/messages/` that nobody edited get the texts of each new
+  version. Edited files stay as they are; the new texts are put next to them as `en.yml.new`.
+
 ### Fixed
 - Messages use the singular for one thing: "1 chunk", "1 named area" instead of "1 chunks",
   "1 named areas". Message files can do this with `{count|chunk|chunks}`.

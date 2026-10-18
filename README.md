@@ -114,6 +114,9 @@ The texts are in `plugins/ChunkKeeper/messages/en.yml` and `de.yml`. Change any 
 becomes "chunk" when count is 1 and "chunks" otherwise. For another language, copy
 `en.yml` to e.g. `fr.yml` and translate it; players with a French client then get it.
 
+Files you did not change are updated automatically when a new ChunkKeeper version brings new texts.
+Files you changed are left alone; the new texts then appear next to them as `en.yml.new`.
+
 ## Permissions
 
 Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
