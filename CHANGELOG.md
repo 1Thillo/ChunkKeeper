@@ -8,8 +8,10 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ### Added
 - `/chunkkeeper show [<radius> | off]` draws the outline of the kept chunks around you with particles
-  for 30 seconds: yellow for single chunks, magenta for named areas, with a post at every corner. Only you see them. The largest
-  radius is `show-max-radius` (16) in config.yml; permission `chunkkeeper.show`.
+  for 30 seconds: yellow for single chunks, magenta for named areas, with a post at every corner.
+  Only you see them. The largest radius is `show-max-radius` (16) in config.yml; permission
+  `chunkkeeper.show`.
+- `CONTRIBUTING.md`: how to build, test and send a pull request.
 
 ## [1.3.0] - 2026-10-18
 

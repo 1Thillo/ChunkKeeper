@@ -44,7 +44,7 @@ class TranslationsTest {
      */
     @Test
     void noKeyAppearsTwice() throws IOException {
-        for (String language : new String[] {"en", "de"}) {
+        for (String language : MessageFiles.BUILT_IN) {
             Set<String> seen = new TreeSet<>();
             Set<String> doubled = new TreeSet<>();
             String section = "";
@@ -67,17 +67,31 @@ class TranslationsTest {
         }
     }
 
+    /**
+     * Only English has to be complete; other languages may miss new texts and show the English
+     * ones until they are translated. But a key that English does not have is a typo.
+     */
     @Test
-    void germanHasExactlyTheEnglishKeys() throws IOException {
-        assertEquals(new TreeSet<>(builtIn("en").keySet()), new TreeSet<>(builtIn("de").keySet()));
+    void translationsOnlyUseKeysThatEnglishHas() throws IOException {
+        Set<String> english = builtIn("en").keySet();
+        for (String language : MessageFiles.BUILT_IN) {
+            Set<String> unknown = new TreeSet<>(builtIn(language).keySet());
+            unknown.removeAll(english);
+            assertEquals(Set.of(), unknown, "keys in " + language + ".yml that en.yml does not have");
+        }
     }
 
     @Test
-    void germanUsesTheSamePlaceholders() throws IOException {
+    void translationsUseTheSamePlaceholders() throws IOException {
         Map<String, String> english = builtIn("en");
-        Map<String, String> german = builtIn("de");
-        for (String key : english.keySet()) {
-            assertEquals(placeholders(english.get(key)), placeholders(german.get(key)), "placeholders of " + key);
+        for (String language : MessageFiles.BUILT_IN) {
+            for (Map.Entry<String, String> text : builtIn(language).entrySet()) {
+                if (!english.containsKey(text.getKey())) {
+                    continue; // reported by translationsOnlyUseKeysThatEnglishHas
+                }
+                assertEquals(placeholders(english.get(text.getKey())), placeholders(text.getValue()),
+                        "placeholders of " + text.getKey() + " in " + language + ".yml");
+            }
         }
     }
 
@@ -132,7 +146,7 @@ class TranslationsTest {
     @Test
     void pluralFormsNameAPlaceholderOfTheirText() throws IOException {
         Pattern plural = Pattern.compile("\\{([a-z0-9]+)\\|");
-        for (String language : new String[] {"en", "de"}) {
+        for (String language : MessageFiles.BUILT_IN) {
             for (Map.Entry<String, String> text : builtIn(language).entrySet()) {
                 Matcher matcher = plural.matcher(text.getValue());
                 while (matcher.find()) {
