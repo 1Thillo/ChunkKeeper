@@ -6,6 +6,8 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-19
+
 ### Added
 - `/chunkkeeper show [<radius> | off]` draws the outline of the kept chunks around you with particles
   for 30 seconds: yellow for single chunks, magenta for named areas, with a post at every corner.
@@ -102,7 +104,8 @@ First release, a replacement for the discontinued KeepChunks plugin with Folia s
 - Safety limits `max-area-chunks` and `rail-search-limit`.
 - Paper and Folia 26.2 support.
 
-[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.0.1...v1.1.0
