@@ -123,7 +123,7 @@ list:
   chunk-entry: "blocks {x}, {z}"
 
 show:
-  started: "Showing the kept chunks within {radius} {radius|chunk|chunks} for {seconds} seconds: green lines are single chunks, blue lines named areas. /chunkkeeper show again turns it off."
+  started: "Showing the kept chunks within {radius} {radius|chunk|chunks} for {seconds} seconds: yellow lines are single chunks, magenta lines named areas. /chunkkeeper show again turns it off."
   stopped: "No longer showing the kept chunks."
   ended: "Stopped showing the kept chunks. /chunkkeeper show shows them again."
   nothing-near: "There are no kept chunks within {radius} {radius|chunk|chunks} of you right now."

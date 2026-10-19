@@ -2,8 +2,10 @@ package de.thillo.chunkkeeper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +19,8 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 
 /**
  * {@code /chunkkeeper show}: draws the outline of the kept chunks around a player with particles,
- * once a second for {@link #SECONDS} seconds. Only that player sees them.
+ * twice a second for {@link #SECONDS} seconds: lines on two heights and a post at every corner.
+ * Only that player sees them.
  *
  * <p>The task runs on the player's own scheduler. On Folia that is the thread of the region the
  * player is in, which is where particles for that player have to be sent; on Paper it is the main
@@ -26,11 +29,15 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 public final class BorderView {
 
     public static final int SECONDS = 30;
-    /** At most this many particles per player and second, so a huge area cannot flood the client. */
-    private static final int PARTICLE_BUDGET = 1500;
-    private static final int STEP = 2;
-    private static final Particle.DustOptions SINGLE = new Particle.DustOptions(Color.fromRGB(0x55, 0xFF, 0x55), 1.5f);
-    private static final Particle.DustOptions AREA = new Particle.DustOptions(Color.fromRGB(0x55, 0xAA, 0xFF), 1.5f);
+    /** Drawn twice a second: dust particles fade after about half a second, so the lines do not flicker. */
+    private static final long PERIOD_TICKS = 10;
+    /** At most this many particles per player and drawing, so a huge area cannot flood the client. */
+    private static final int PARTICLE_BUDGET = 2000;
+    /** Corner posts reach from a little below the player's feet to this many blocks above them. */
+    private static final double POST_HEIGHT = 4;
+    // Yellow and magenta stand out against grass, water, sky and stone; green and blue did not.
+    private static final Particle.DustOptions SINGLE = new Particle.DustOptions(Color.fromRGB(0xFF, 0xE0, 0x10), 2.0f);
+    private static final Particle.DustOptions AREA = new Particle.DustOptions(Color.fromRGB(0xFF, 0x30, 0xF0), 2.0f);
 
     private final ChunkKeeper plugin;
     private final Map<UUID, ScheduledTask> running = new ConcurrentHashMap<>();
@@ -51,16 +58,17 @@ public final class BorderView {
     public boolean start(Player player, int radius) {
         stop(player);
         UUID id = player.getUniqueId();
-        AtomicInteger seconds = new AtomicInteger();
+        AtomicInteger drawings = new AtomicInteger();
+        long total = SECONDS * 20L / PERIOD_TICKS;
         ScheduledTask task = player.getScheduler().runAtFixedRate(plugin, self -> {
-            if (seconds.incrementAndGet() > SECONDS) {
+            if (drawings.incrementAndGet() > total) {
                 self.cancel();
                 running.remove(id, self);
                 Messages.info(player, "show.ended");
                 return;
             }
             draw(player, radius);
-        }, () -> running.remove(id), 1L, 20L);
+        }, () -> running.remove(id), 1L, PERIOD_TICKS);
         if (task == null) {
             return false;
         }
@@ -115,21 +123,44 @@ public final class BorderView {
                 .toList();
 
         int budget = PARTICLE_BUDGET;
-        double[] heights = {at.getY() + 0.5, at.getY() + 2.0};
+        Set<Long> posts = new HashSet<>();
+        double[] heights = {at.getY() + 0.3, at.getY() + 2.3};
         for (Line line : near) {
             ChunkBorders.Edge edge = line.edge();
             int dx = Integer.signum(edge.x2() - edge.x1());
             int dz = Integer.signum(edge.z2() - edge.z1());
-            for (int step = 0; step <= 16 && budget > 0; step += STEP) {
+            // one particle per block along the edge, on two heights
+            for (int step = 0; step <= 16 && budget > 0; step++) {
                 for (double y : heights) {
-                    player.spawnParticle(Particle.DUST, edge.x1() + dx * step, y, edge.z1() + dz * step, 1, 0, 0, 0, 0, line.colour());
-                    budget--;
+                    budget -= spawn(player, edge.x1() + dx * step, y, edge.z1() + dz * step, line.colour());
                 }
             }
+            // a post at both ends; corners shared by two edges get only one
+            budget -= post(player, posts, edge.x1(), edge.z1(), at.getY(), line.colour(), budget);
+            budget -= post(player, posts, edge.x2(), edge.z2(), at.getY(), line.colour(), budget);
             if (budget <= 0) {
                 break;
             }
         }
+    }
+
+    /** A vertical line at a corner, unless that corner already has one. @return how many particles were sent */
+    private static int post(Player player, Set<Long> posts, int x, int z, double feet, Particle.DustOptions colour, int budget) {
+        // x and z packed into one number, so the set can tell corners apart
+        if (budget <= 0 || !posts.add(((long) x << 32) | (z & 0xFFFFFFFFL))) {
+            return 0;
+        }
+        int sent = 0;
+        for (double y = feet - 1; y <= feet + POST_HEIGHT && sent < budget; y += 0.5) {
+            sent += spawn(player, x, y, z, colour);
+        }
+        return sent;
+    }
+
+    /** @return how many particles were sent, for the budget */
+    private static int spawn(Player player, double x, double y, double z, Particle.DustOptions colour) {
+        player.spawnParticle(Particle.DUST, x, y, z, 1, 0, 0, 0, 0, colour);
+        return 1;
     }
 
     private static KeptChunk centre(Player player) {

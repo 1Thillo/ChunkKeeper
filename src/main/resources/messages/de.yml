@@ -124,7 +124,7 @@ list:
   chunk-entry: "Blöcke {x}, {z}"
 
 show:
-  started: "Die gehaltenen Chunks im Umkreis von {radius} {radius|Chunk|Chunks} werden {seconds} Sekunden lang angezeigt: Grüne Linien sind Einzelchunks, blaue benannte Bereiche. Nochmal /chunkkeeper show schaltet es aus."
+  started: "Die gehaltenen Chunks im Umkreis von {radius} {radius|Chunk|Chunks} werden {seconds} Sekunden lang angezeigt: Gelbe Linien sind Einzelchunks, magentafarbene benannte Bereiche. Nochmal /chunkkeeper show schaltet es aus."
   stopped: "Die gehaltenen Chunks werden nicht mehr angezeigt."
   ended: "Anzeige der gehaltenen Chunks beendet. /chunkkeeper show zeigt sie erneut an."
   nothing-near: "Im Umkreis von {radius} {radius|Chunk|Chunks} um dich werden gerade keine Chunks gehalten."
