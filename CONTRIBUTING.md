@@ -35,11 +35,16 @@ lines in `.github/smoke-test/expected.txt` in the log.
   the global region thread and blocks only be read on the thread of their region; `ChunkLoader`
   has helpers for both. Changes to what is kept go through `Keeper`, whose methods are
   `synchronized`.
-- **Texts in both languages.** Every message is a key in `src/main/resources/messages/en.yml`
-  *and* `de.yml`, never a string in the code. Placeholders are `{name}`, plural forms
-  `{count|chunk|chunks}`. The tests fail if a key or placeholder is missing in one of the files.
-  If you don't speak German, copy the English text into `de.yml` and say so in the pull request.
+- **Texts in `en.yml`.** Every message is a key in `src/main/resources/messages/en.yml`, never a
+  string in the code. Placeholders are `{name}`, plural forms `{count|chunk|chunks}`. English is
+  the only language that has to be complete: the other files in `messages/` (German and any
+  other language) may miss new texts, and ChunkKeeper shows the English text until someone
+  translates it. If you do add a translation, keep the placeholders of the English text; the
+  tests check that, and that no file has keys that `en.yml` does not have.
   Avoid `on`, `off`, `yes` and `no` as keys: YAML reads them as true or false.
+- **Translations.** A new language is a new file in `messages/` named after the language code
+  (e.g. `fr.yml`), added to `MessageFiles.BUILT_IN`. Please only translate languages you speak
+  well; mark a file that is partly machine-translated at the top.
 - **Tests.** Logic that does not need a server (like `Keeper`, `ChunkStore`, `Area`) gets unit
   tests. New commands get a line in the smoke test where that is possible from the console.
 - **Changelog and docs.** Add a line to the "Unreleased" section of `CHANGELOG.md`, and update the
