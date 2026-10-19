@@ -11,7 +11,8 @@ public record Settings(
         int maxAreaChunks,
         String language,
         String consoleLanguage,
-        int backupsToKeep) {
+        int backupsToKeep,
+        int showMaxRadius) {
 
     public static Settings from(FileConfiguration config) {
         return new Settings(
@@ -22,6 +23,7 @@ public record Settings(
                 Math.max(1, config.getInt("max-area-chunks", 10000)),
                 config.getString("language", "auto"),
                 config.getString("console-language", "en"),
-                Math.max(1, config.getInt("backups-to-keep", 20)));
+                Math.max(1, config.getInt("backups-to-keep", 20)),
+                Math.max(1, config.getInt("show-max-radius", 16)));
     }
 }

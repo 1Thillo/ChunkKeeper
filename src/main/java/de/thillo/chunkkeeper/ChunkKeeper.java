@@ -26,6 +26,7 @@ public final class ChunkKeeper extends JavaPlugin {
     private volatile Settings settings;
     private Permissions permissions;
     private Keeper keeper;
+    private BorderView borderView;
     private KeepChunksImporter importer;
     private Hooks hooks;
     private History history;
@@ -38,6 +39,7 @@ public final class ChunkKeeper extends JavaPlugin {
         store = new ChunkStore(new File(getDataFolder(), "chunks.yml"), getLogger());
         loader = new ChunkLoader(this);
         keeper = new Keeper(store, loader);
+        borderView = new BorderView(this);
         permissions = new Permissions(this);
         importer = new KeepChunksImporter(getDataFolder().getParentFile());
         hooks = new Hooks();
@@ -65,6 +67,14 @@ public final class ChunkKeeper extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
         registerCommand();
+    }
+
+    @Override
+    public void onDisable() {
+        // PlugMan reloads: particles from the old plugin instance must not keep running
+        if (borderView != null) {
+            borderView.stopAll();
+        }
     }
 
     private void loadMessages() {
@@ -157,6 +167,10 @@ public final class ChunkKeeper extends JavaPlugin {
 
     public Permissions permissions() {
         return permissions;
+    }
+
+    public BorderView borderView() {
+        return borderView;
     }
 
     public Keeper keeper() {

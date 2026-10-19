@@ -119,7 +119,7 @@ class TranslationsTest {
     void everySubcommandHasAHelpText() throws IOException {
         Set<String> english = builtIn("en").keySet();
         for (String subcommand : new String[] {"keepchunk", "releasechunk", "keepregion", "releaseregion", "keeprail",
-                "releaserail", "area", "releaseall", "list", "chunkinfo", "reload", "import", "version"}) {
+                "releaserail", "area", "releaseall", "list", "chunkinfo", "show", "reload", "import", "version"}) {
             assertTrue(english.contains("help." + subcommand), "help." + subcommand);
         }
     }
