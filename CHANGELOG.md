@@ -6,6 +6,9 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `CONTRIBUTING.md`: how to build, test and send a pull request.
+
 ## [1.3.0] - 2026-10-18
 
 ### Added
