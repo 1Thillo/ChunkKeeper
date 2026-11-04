@@ -12,7 +12,8 @@ public record Settings(
         String language,
         String consoleLanguage,
         int backupsToKeep,
-        int showMaxRadius) {
+        int showMaxRadius,
+        int forceLoadCheckMinutes) {
 
     public static Settings from(FileConfiguration config) {
         return new Settings(
@@ -24,6 +25,7 @@ public record Settings(
                 config.getString("language", "auto"),
                 config.getString("console-language", "en"),
                 Math.max(1, config.getInt("backups-to-keep", 20)),
-                Math.max(1, config.getInt("show-max-radius", 16)));
+                Math.max(1, config.getInt("show-max-radius", 16)),
+                Math.max(0, config.getInt("force-load-check-minutes", 5)));
     }
 }
