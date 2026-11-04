@@ -6,6 +6,11 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Other plugins or `/forceload remove all` can remove the force-load flag of kept chunks. ChunkKeeper now
+  checks all kept chunks in loaded worlds every `force-load-check-minutes` (5, `0` = off) minutes, sets
+  missing flags again and logs how many it repaired.
+
 ## [1.4.0] - 2026-10-19
 
 ### Added
