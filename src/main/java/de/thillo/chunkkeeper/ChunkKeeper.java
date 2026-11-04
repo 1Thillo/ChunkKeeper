@@ -31,6 +31,7 @@ public final class ChunkKeeper extends JavaPlugin {
     private Hooks hooks;
     private History history;
     private Backups backups;
+    private ForceLoadRepair forceLoadRepair;
 
     @Override
     public void onEnable() {
@@ -67,10 +68,17 @@ public final class ChunkKeeper extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(new WorldListener(this), this);
         registerCommand();
+
+        forceLoadRepair = new ForceLoadRepair(this, store);
+        forceLoadRepair.start(settings.forceLoadCheckMinutes());
     }
 
     @Override
     public void onDisable() {
+        // PlugMan reloads: the old plugin instance must not keep checking
+        if (forceLoadRepair != null) {
+            forceLoadRepair.stop();
+        }
         // PlugMan reloads: particles from the old plugin instance must not keep running
         if (borderView != null) {
             borderView.stopAll();
@@ -142,6 +150,7 @@ public final class ChunkKeeper extends JavaPlugin {
         backups = new Backups(new File(getDataFolder(), "chunks.yml").toPath(), new File(getDataFolder(), "backups").toPath(),
                 settings.backupsToKeep());
         reloadChunks();
+        forceLoadRepair.start(settings.forceLoadCheckMinutes());
     }
 
     /** Reads chunks.yml again: chunks that are gone are released, all others are force-loaded (again). */
