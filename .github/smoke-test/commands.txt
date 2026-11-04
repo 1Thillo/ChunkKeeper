@@ -62,6 +62,9 @@ minecraft:forceload add 800 800
 wait 3
 chk import forceload world
 chk import forceload
+# Something else removes the force-load flags: the next check (every minute here) sets them again
+minecraft:forceload remove all
+wait 65
 chk releasechunk coords 50 50 world
 chk releaseall confirm
 chk list

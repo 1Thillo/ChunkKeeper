@@ -27,6 +27,9 @@ cp "$PLUGIN_JAR" "$SERVER/plugins/"
 mkdir -p "$SERVER/plugins/KeepChunks"
 printf 'chunks:\n- 10#10#world\n- -3#-4#world\n- broken\n' > "$SERVER/plugins/KeepChunks/data.yml"
 printf 'general:\n  releaseallprotection: false\n' > "$SERVER/plugins/KeepChunks/config.yml"
+# Check the force-load flags every minute, so the test does not have to wait for the default of 5.
+mkdir -p "$SERVER/plugins/ChunkKeeper"
+printf 'force-load-check-minutes: 1\n' > "$SERVER/plugins/ChunkKeeper/config.yml"
 echo "eula=true" > "$SERVER/eula.txt"   # the repository owner agreed to run test servers in CI
 cat > "$SERVER/server.properties" <<'EOF'
 online-mode=false
