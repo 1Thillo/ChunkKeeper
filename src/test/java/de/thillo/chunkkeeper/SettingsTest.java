@@ -11,7 +11,7 @@ class SettingsTest {
     @Test
     void missingValuesFallBackToDefaults() {
         Settings settings = Settings.from(new YamlConfiguration());
-        assertEquals(new Settings(true, true, true, 50000, 10000, "auto", "en", 20, 16), settings);
+        assertEquals(new Settings(true, true, true, 50000, 10000, "auto", "en", 20, 16, 5), settings);
     }
 
     @Test
@@ -27,8 +27,20 @@ class SettingsTest {
                 console-language: de
                 backups-to-keep: 5
                 show-max-radius: 4
+                force-load-check-minutes: 2
                 """);
-        assertEquals(new Settings(false, false, false, 123, 456, "de", "de", 5, 4), Settings.from(config));
+        assertEquals(new Settings(false, false, false, 123, 456, "de", "de", 5, 4, 2), Settings.from(config));
+    }
+
+    @Test
+    void forceLoadCheckCanBeSwitchedOffButNotNegative() throws InvalidConfigurationException {
+        YamlConfiguration off = new YamlConfiguration();
+        off.loadFromString("force-load-check-minutes: 0\n");
+        assertEquals(0, Settings.from(off).forceLoadCheckMinutes());
+
+        YamlConfiguration negative = new YamlConfiguration();
+        negative.loadFromString("force-load-check-minutes: -3\n");
+        assertEquals(0, Settings.from(negative).forceLoadCheckMinutes());
     }
 
     @Test

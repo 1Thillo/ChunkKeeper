@@ -47,6 +47,7 @@ Saved backup
 There is no backup called 'nope'
 Took over 1 chunk force-loaded with /forceload; ChunkKeeper keeps it on its own now
 ChunkKeeper already keeps every force-loaded chunk (
+repaired: 7 (
 Saved a backup first:
 Changes, newest first
 | CONSOLE | released all: 2 chunks and 1 named area

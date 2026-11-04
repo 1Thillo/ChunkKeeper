@@ -140,6 +140,7 @@ Every subcommand has its own permission, `chunkkeeper.<subcommand>`, for example
 | `console-language` | `en` | Language of the console when `language` is `auto` |
 | `backups-to-keep` | `20` | How many backups of `chunks.yml` are kept |
 | `show-max-radius` | `16` | The largest radius for `/chunkkeeper show`; more means more particles |
+| `force-load-check-minutes` | `5` | How often kept chunks that lost their force-load flag (for example through `/forceload remove all`) get it back; `0` = off |
 
 The kept chunks are stored in `plugins/ChunkKeeper/chunks.yml`: single chunks under `chunks`
 (`x,z,world`, with who added them and when) and named areas under `areas`.

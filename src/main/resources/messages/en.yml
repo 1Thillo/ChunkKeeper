@@ -108,7 +108,7 @@ info:
   label-areas: "Named areas"
   label-force-loaded: "Force-loaded"
   label-loaded: "Loaded right now"
-  not-force-loaded-yet: "The chunk is kept but not force-loaded yet; this fixes itself within a moment or after /chunkkeeper reload."
+  not-force-loaded-yet: "The chunk is kept but not force-loaded right now; this fixes itself within a moment, at the next check (force-load-check-minutes) or after /chunkkeeper reload."
   forced-by-something-else: "Something else force-loads this chunk, for example the vanilla /forceload command. /chunkkeeper import forceload takes such chunks over."
 
 list:
