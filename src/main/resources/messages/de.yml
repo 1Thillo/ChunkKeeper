@@ -109,7 +109,7 @@ info:
   label-areas: "Benannte Bereiche"
   label-force-loaded: "Dauerhaft geladen (force-loaded)"
   label-loaded: "Gerade geladen"
-  not-force-loaded-yet: "Der Chunk wird gehalten, ist aber noch nicht dauerhaft geladen; das erledigt sich gleich von selbst oder nach /chunkkeeper reload."
+  not-force-loaded-yet: "Der Chunk wird gehalten, ist aber gerade nicht dauerhaft geladen; das erledigt sich gleich von selbst, bei der nächsten Prüfung (force-load-check-minutes) oder nach /chunkkeeper reload."
   forced-by-something-else: "Etwas anderes hält diesen Chunk dauerhaft geladen, zum Beispiel der Vanilla-Befehl /forceload. /chunkkeeper import forceload übernimmt solche Chunks."
 
 list:
