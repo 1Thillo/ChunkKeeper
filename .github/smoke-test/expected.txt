@@ -45,6 +45,15 @@ Added on its own by: CONSOLE,
 Saved backup
 1 backup, newest first:
 There is no backup called 'nope'
+Created area 'grow' with 2 chunks
+Added 4 chunks from chunks (90, 90) to (92, 91) in 'world' to area 'grow' (4 of them were not kept before).
+Area 'grow' already has every chunk in
+Area 'grow' is in world 'world', but the selection is in 'world_nether'.
+Removed 2 chunks in chunks (90, 90) to (90, 91) in 'world' from area 'grow'.
+Area 'grow' has no chunks in
+That would remove every chunk of area 'grow'
+Released area 'grow' (4 chunks).
+| CONSOLE | added 4 chunks to area 'grow'
 Took over 1 chunk force-loaded with /forceload; ChunkKeeper keeps it on its own now
 ChunkKeeper already keeps every force-loaded chunk (
 repaired: 7 (
