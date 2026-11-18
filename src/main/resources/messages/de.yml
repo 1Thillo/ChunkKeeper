@@ -183,7 +183,7 @@ history:
   backup-restored: "Sicherung {name} wiederhergestellt"
 
 backup:
-  none: "Es gibt noch keine Sicherungen. Sie entstehen vor releaseall, import und restore oder mit /chunkkeeper backup create."
+  none: "Es gibt noch keine Sicherungen. Sie entstehen vor releaseall, import, area remove und restore oder mit /chunkkeeper backup create."
   list-header: "{count} {count|Sicherung|Sicherungen}, neueste zuerst:"
   contents: "{chunks} {chunks|Einzelchunk|Einzelchunks}, {areas} {areas|benannter Bereich|benannte Bereiche}"
   nothing-to-save: "Es gibt noch keine chunks.yml zum Sichern."

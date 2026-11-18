@@ -58,6 +58,8 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `area info <name>` | World, size and origin of a named area |
 | `area release <name>` | Release a named area |
 | `area rename <name> <new name>` | Rename a named area |
+| `area add <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world>)` | Add the chunks of a selection to a named area |
+| `area remove <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world>)` | Remove the chunks of a selection from a named area |
 | `area convert <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world> \| world <world>)` | Turn the single chunks inside a selection into a named area |
 | `area dissolve <name>` | Turn a named area back into single chunks |
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
@@ -94,6 +96,12 @@ inside that WorldGuard region into the area `halloween`, and `area convert event
 all single chunks of the world `event`. Chunks in the selection that are not kept are left out.
 `area dissolve <name>` does the opposite. Neither of them unloads a chunk on the way.
 
+An area can grow or shrink without releasing it: `area add farm radius 1` adds the chunks around
+you to the area `farm`, `area remove farm coords 10 10 12 12 world` takes those chunks out again.
+The selection has to be in the area's world, `max-area-chunks` applies to the whole area afterwards,
+and an area cannot lose its last chunk this way (use `area release` for that). Removed chunks stay
+loaded if they are kept on their own or by another area.
+
 Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 
 ### Who, when and backups
@@ -101,7 +109,7 @@ Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 - `chunkinfo` and `area info` show who added a single chunk or created an area, and when.
 - Every change is written to `plugins/ChunkKeeper/history.log` with time, name and what happened,
   releases included; `/chunkkeeper history` shows it in the game.
-- Before `releaseall`, `import` and restoring a backup, ChunkKeeper copies `chunks.yml` to
+- Before `releaseall`, `import`, `area remove` and restoring a backup, ChunkKeeper copies `chunks.yml` to
   `plugins/ChunkKeeper/backups/`. An accidental `releaseall` can be undone with
   `/chunkkeeper backup restore <name> confirm`; the message after `releaseall` names the backup.
   Restoring makes a backup of the current state first, so it can be undone as well.

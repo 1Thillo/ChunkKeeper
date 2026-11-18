@@ -182,7 +182,7 @@ history:
   backup-restored: "restored backup {name}"
 
 backup:
-  none: "There are no backups yet. They are made before releaseall, import and restore, or with /chunkkeeper backup create."
+  none: "There are no backups yet. They are made before releaseall, import, area remove and restore, or with /chunkkeeper backup create."
   list-header: "{count} {count|backup|backups}, newest first:"
   contents: "{chunks} single {chunks|chunk|chunks}, {areas} named {areas|area|areas}"
   nothing-to-save: "There is no chunks.yml to back up yet."

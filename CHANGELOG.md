@@ -6,6 +6,12 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+- `area add <name> <selection>` and `area remove <name> <selection>` change the chunks of a named area
+  without releasing it, with the same selections as `keepregion`. The selection has to be in the area's
+  world and `max-area-chunks` applies to the result. Only removed chunks that nothing else keeps are
+  unloaded, and `area remove` makes a backup first.
+
 ## [1.5.0] - 2026-11-04
 
 ### Added
