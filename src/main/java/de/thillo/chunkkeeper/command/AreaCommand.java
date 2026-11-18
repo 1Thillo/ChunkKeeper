@@ -20,12 +20,16 @@ import de.thillo.chunkkeeper.Text;
 /**
  * {@code area}: lists and manages named areas. They are created with {@code keepregion ... --name},
  * {@code keeprail ... --name} or {@code area convert}, which groups existing single chunks.
+ * {@code area add} and {@code area remove} change the chunks of an area without releasing it.
  */
 final class AreaCommand implements Subcommand {
 
-    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "convert", "dissolve");
+    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "add", "remove", "convert", "dissolve");
     private static final String CONVERT_USAGE =
             "convert <name> (coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world> | world <world>)";
+
+    private static final String ADD_USAGE = "add <name> " + Arguments.AREA_USAGE;
+    private static final String REMOVE_USAGE = "remove <name> " + Arguments.AREA_USAGE;
 
     private final ChunkKeeper plugin;
 
@@ -40,7 +44,7 @@ final class AreaCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return "(list | info <name> | release <name> | rename <name> <new name> | " + CONVERT_USAGE + " | dissolve <name>)";
+        return "(list | info <name> | release <name> | rename <name> <new name> | add <name> ... | remove <name> ... | " + CONVERT_USAGE + " | dissolve <name>)";
     }
 
 
@@ -68,6 +72,20 @@ final class AreaCommand implements Subcommand {
                     rename(sender, args[1].toLowerCase(), args[2].toLowerCase());
                 } else {
                     Arguments.sendUsage(sender, name(), "rename <name> <new name>");
+                }
+            }
+            case "add" -> {
+                if (args.length >= 3) {
+                    add(sender, args[1].toLowerCase(), Arrays.copyOfRange(args, 2, args.length));
+                } else {
+                    Arguments.sendUsage(sender, name(), ADD_USAGE);
+                }
+            }
+            case "remove" -> {
+                if (args.length >= 3) {
+                    remove(sender, args[1].toLowerCase(), Arrays.copyOfRange(args, 2, args.length));
+                } else {
+                    Arguments.sendUsage(sender, name(), REMOVE_USAGE);
                 }
             }
             case "convert" -> {
@@ -151,6 +169,70 @@ final class AreaCommand implements Subcommand {
         } else {
             Messages.error(sender, "general.area-exists-short", "name", newName);
         }
+    }
+
+    /** Adds the chunks of a selection to an existing area. Chunks nothing kept before are loaded. */
+    private void add(CommandSender sender, String areaName, String[] selectionArgs) {
+        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "add <name>");
+        if (selection.isEmpty()) {
+            return;
+        }
+        Text where = selection.get().description();
+        int limit = plugin.settings().maxAreaChunks();
+        Keeper.AreaChange change = plugin.keeper().addToArea(areaName, selection.get().chunks(), limit);
+        switch (change.outcome()) {
+            case CHANGED -> {
+                Messages.success(sender, "area.added", "count", change.chunks(), "selection", where, "name", areaName,
+                        "new", change.loadChanged());
+                plugin.recordChange(sender, "history.area-added", "count", change.chunks(), "name", areaName, "selection", where);
+            }
+            case NOTHING_TO_CHANGE -> Messages.error(sender, "area.nothing-to-add", "name", areaName, "selection", where);
+            case TOO_LARGE -> Messages.error(sender, "general.area-too-large", "size", change.chunks(), "limit", limit);
+            default -> Messages.error(sender, "general.area-unknown", "name", areaName);
+        }
+    }
+
+    /**
+     * Removes the chunks of a selection from an existing area. Removed chunks that nothing else
+     * keeps are unloaded, so a backup is made first.
+     */
+    private void remove(CommandSender sender, String areaName, String[] selectionArgs) {
+        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "remove <name>");
+        if (selection.isEmpty()) {
+            return;
+        }
+        Text where = selection.get().description();
+        Runnable backup = () -> plugin.backupNow("area-remove")
+                .ifPresent(name -> Messages.info(sender, "backup.automatic", "name", name));
+        Keeper.AreaChange change = plugin.keeper().removeFromArea(areaName, selection.get().chunks(), backup);
+        switch (change.outcome()) {
+            case CHANGED -> {
+                Messages.success(sender, "area.removed", "count", change.chunks(), "selection", where, "name", areaName);
+                plugin.recordChange(sender, "history.area-removed", "count", change.chunks(), "name", areaName, "selection", where);
+                int stillKept = change.chunks() - change.loadChanged();
+                if (stillKept > 0) {
+                    Messages.info(sender, "area.still-kept", "count", stillKept);
+                }
+            }
+            case NOTHING_TO_CHANGE -> Messages.error(sender, "area.nothing-to-remove", "name", areaName, "selection", where);
+            case WOULD_BE_EMPTY -> Messages.error(sender, "area.would-be-empty", "name", areaName);
+            default -> Messages.error(sender, "general.area-unknown", "name", areaName);
+        }
+    }
+
+    /** Reads the selection for add and remove. The area must exist and the selection lie in its world. */
+    private Optional<Area> selectionFor(CommandSender sender, String areaName, String[] selectionArgs, String command) {
+        Optional<NamedArea> area = find(sender, areaName);
+        if (area.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<Area> selection = Arguments.area(plugin, sender, selectionArgs, name() + " " + command);
+        if (selection.isPresent() && !selection.get().world().equals(area.get().world())) {
+            Messages.error(sender, "area.other-world", "name", areaName, "world", area.get().world(),
+                    "other", selection.get().world());
+            return Optional.empty();
+        }
+        return selection;
     }
 
     /**
@@ -238,6 +320,9 @@ final class AreaCommand implements Subcommand {
         String action = args[0].toLowerCase();
         if (action.equals("convert")) {
             return convertSuggestions(sender, args);
+        }
+        if (args.length >= 3 && (action.equals("add") || action.equals("remove"))) {
+            return Arguments.areaSuggestions(plugin, sender, Arrays.copyOfRange(args, 2, args.length));
         }
         if (args.length == 2 && !action.equals("list")) {
             return plugin.store().areas().stream().map(NamedArea::name).toList();
