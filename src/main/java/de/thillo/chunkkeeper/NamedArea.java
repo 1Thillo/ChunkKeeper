@@ -31,4 +31,9 @@ public record NamedArea(String name, String world, Set<KeptChunk> chunks, String
     public NamedArea renamed(String newName) {
         return new NamedArea(newName, world, chunks, source, origin);
     }
+
+    /** The same area with other chunks. Name, world, source and origin stay as they are. */
+    public NamedArea withChunks(Set<KeptChunk> newChunks) {
+        return new NamedArea(name, world, newChunks, source, origin);
+    }
 }

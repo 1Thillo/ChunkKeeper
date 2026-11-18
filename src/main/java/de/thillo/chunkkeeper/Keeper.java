@@ -155,6 +155,69 @@ public final class Keeper {
         return Optional.of(added);
     }
 
+    /**
+     * Adds chunks to an existing named area. Chunks the area already has are skipped.
+     *
+     * @param limit the most chunks the area may have afterwards (max-area-chunks)
+     * @return what happened; {@code loadChanged} counts the chunks that were not kept by anything before
+     */
+    public synchronized AreaChange addToArea(String name, Collection<KeptChunk> chunks, int limit) {
+        Optional<NamedArea> area = store.area(name);
+        if (area.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NO_SUCH_AREA, 0, 0);
+        }
+        Set<KeptChunk> newChunks = new HashSet<>(chunks);
+        newChunks.removeAll(area.get().chunks());
+        if (newChunks.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NOTHING_TO_CHANGE, 0, 0);
+        }
+        Set<KeptChunk> result = new HashSet<>(area.get().chunks());
+        result.addAll(newChunks);
+        if (result.size() > limit) {
+            return new AreaChange(AreaChange.Outcome.TOO_LARGE, result.size(), 0);
+        }
+        // look this up before the area changes, afterwards every new chunk counts as kept
+        List<KeptChunk> nowLoaded = newChunks.stream().filter(chunk -> !store.isKept(chunk)).toList();
+        store.removeArea(name);
+        store.addArea(area.get().withChunks(result));
+        loader.keepLoaded(nowLoaded);
+        store.save();
+        return new AreaChange(AreaChange.Outcome.CHANGED, newChunks.size(), nowLoaded.size());
+    }
+
+    /**
+     * Removes chunks from an existing named area. Removed chunks stay loaded where something else
+     * still keeps them. An area cannot lose all its chunks this way, {@link #releaseArea} is for that.
+     *
+     * @param beforeChange runs once all checks have passed and just before anything changes, for
+     *                     example to make a backup
+     * @return what happened; {@code loadChanged} counts the chunks that are no longer loaded
+     */
+    public synchronized AreaChange removeFromArea(String name, Collection<KeptChunk> chunks, Runnable beforeChange) {
+        Optional<NamedArea> area = store.area(name);
+        if (area.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NO_SUCH_AREA, 0, 0);
+        }
+        Set<KeptChunk> removed = new HashSet<>(chunks);
+        removed.retainAll(area.get().chunks());
+        if (removed.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NOTHING_TO_CHANGE, 0, 0);
+        }
+        Set<KeptChunk> result = new HashSet<>(area.get().chunks());
+        result.removeAll(removed);
+        if (result.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.WOULD_BE_EMPTY, removed.size(), 0);
+        }
+        beforeChange.run();
+        store.removeArea(name);
+        store.addArea(area.get().withChunks(result));
+        // look this up after the area changed, so the area itself no longer counts
+        List<KeptChunk> nowUnloaded = removed.stream().filter(chunk -> !store.isKept(chunk)).toList();
+        loader.release(nowUnloaded);
+        store.save();
+        return new AreaChange(AreaChange.Outcome.CHANGED, removed.size(), nowUnloaded.size());
+    }
+
     /** @return false if the new name is taken or the old one does not exist */
     public synchronized boolean renameArea(String oldName, String newName) {
         Optional<NamedArea> area = store.area(oldName);
@@ -187,5 +250,24 @@ public final class Keeper {
     }
 
     public record ReleaseAll(int chunks, int areas) {
+    }
+
+    /**
+     * The result of {@link #addToArea} or {@link #removeFromArea}.
+     *
+     * @param chunks      how many chunks were added or removed; for TOO_LARGE the size the area
+     *                    would have had, for WOULD_BE_EMPTY how many chunks would have been removed
+     * @param loadChanged how many chunks were loaded or unloaded because of it
+     */
+    public record AreaChange(Outcome outcome, int chunks, int loadChanged) {
+
+        public enum Outcome {
+            CHANGED,
+            NO_SUCH_AREA,
+            /** add: the area has all these chunks already; remove: it has none of them */
+            NOTHING_TO_CHANGE,
+            TOO_LARGE,
+            WOULD_BE_EMPTY
+        }
     }
 }
