@@ -64,7 +64,7 @@ chk area add grow coords 90 90 91 90 world
 chk area add grow coords 90 90 91 90 world_nether
 chk area remove grow coords 90 90 90 91 world
 chk area remove grow coords 95 95 95 95 world
-chk area remove grow coords 80 80 99 99 world
+chk area remove grow coords 0 0 200 200 world
 chk area release grow
 # Take over a chunk from the vanilla /forceload command
 minecraft:forceload add 800 800

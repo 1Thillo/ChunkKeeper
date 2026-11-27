@@ -173,12 +173,13 @@ final class AreaCommand implements Subcommand {
 
     /** Adds the chunks of a selection to an existing area. Chunks nothing kept before are loaded. */
     private void add(CommandSender sender, String areaName, String[] selectionArgs) {
-        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "add <name>");
+        int limit = plugin.settings().maxAreaChunks();
+        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "add <name>",
+                new Arguments.Limit(limit, true));
         if (selection.isEmpty()) {
             return;
         }
         Text where = selection.get().description();
-        int limit = plugin.settings().maxAreaChunks();
         Keeper.AreaChange change = plugin.keeper().addToArea(areaName, selection.get().chunks(), limit);
         switch (change.outcome()) {
             case CHANGED -> {
@@ -197,7 +198,8 @@ final class AreaCommand implements Subcommand {
      * keeps are unloaded, so a backup is made first.
      */
     private void remove(CommandSender sender, String areaName, String[] selectionArgs) {
-        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "remove <name>");
+        // max-area-chunks does not apply here: removing never loads anything
+        Optional<Area> selection = selectionFor(sender, areaName, selectionArgs, "remove <name>", Arguments.Limit.REMOVE);
         if (selection.isEmpty()) {
             return;
         }
@@ -221,12 +223,13 @@ final class AreaCommand implements Subcommand {
     }
 
     /** Reads the selection for add and remove. The area must exist and the selection lie in its world. */
-    private Optional<Area> selectionFor(CommandSender sender, String areaName, String[] selectionArgs, String command) {
+    private Optional<Area> selectionFor(CommandSender sender, String areaName, String[] selectionArgs, String command,
+            Arguments.Limit limit) {
         Optional<NamedArea> area = find(sender, areaName);
         if (area.isEmpty()) {
             return Optional.empty();
         }
-        Optional<Area> selection = Arguments.area(plugin, sender, selectionArgs, name() + " " + command);
+        Optional<Area> selection = Arguments.area(plugin, sender, selectionArgs, name() + " " + command, limit);
         if (selection.isPresent() && !selection.get().world().equals(area.get().world())) {
             Messages.error(sender, "area.other-world", "name", areaName, "world", area.get().world(),
                     "other", selection.get().world());

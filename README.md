@@ -98,8 +98,9 @@ all single chunks of the world `event`. Chunks in the selection that are not kep
 
 An area can grow or shrink without releasing it: `area add farm radius 1` adds the chunks around
 you to the area `farm`, `area remove farm coords 10 10 12 12 world` takes those chunks out again.
-The selection has to be in the area's world, `max-area-chunks` applies to the whole area afterwards,
-and an area cannot lose its last chunk this way (use `area release` for that). Removed chunks stay
+The selection has to be in the area's world, and for `area add` the limit `max-area-chunks` applies to
+the whole area afterwards. `area remove` never loads a chunk, so it also takes larger selections. An
+area cannot lose its last chunk this way (use `area release` for that). Removed chunks stay
 loaded if they are kept on their own or by another area.
 
 Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).

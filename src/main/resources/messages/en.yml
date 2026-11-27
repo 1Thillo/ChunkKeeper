@@ -17,6 +17,7 @@ general:
   worldedit-missing: "WorldEdit or FastAsyncWorldEdit is not installed."
   worldguard-missing: "WorldGuard is not installed."
   area-too-large: "That area has {size} {size|chunk|chunks}, more than the limit of {limit} (max-area-chunks in config.yml)."
+  selection-too-large: "That selection has {size} {size|chunk|chunks}, more than {limit}. Use a smaller one."
   radius-too-large: "A radius of {radius} is too large: max-area-chunks in config.yml allows {limit} chunks, which is radius {largest} at most."
   negative-radius: "The radius must be 0 or more: 0 is one chunk, 1 is 3 x 3 chunks, 2 is 5 x 5."
   name-missing: "Give a name after --name, e.g. --name halloween."
