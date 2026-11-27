@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -177,5 +178,91 @@ class KeeperTest {
         loader.forced.clear();
         assertEquals(1, keeper.keep(List.of(A), TESTER));
         assertFalse(loader.forced.contains(A), "already force-loaded through the area, no second request");
+    }
+
+    @Test
+    void addingToAnAreaLoadsOnlyChunksNothingKeptBefore() {
+        keeper.createArea(area("farm", A));
+        keeper.keep(List.of(B), TESTER);
+        Keeper.AreaChange change = keeper.addToArea("farm", List.of(A, B, C), 100);
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 2, 1), change, "A was in the area, B kept on its own");
+        assertEquals(Set.of(A, B, C), store.area("farm").orElseThrow().chunks());
+        assertEquals(Set.of(A, B, C), loader.forced);
+    }
+
+    @Test
+    void addingKeepsNameSourceAndOrigin() {
+        keeper.createArea(area("farm", A));
+        keeper.addToArea("farm", List.of(B), 100);
+        NamedArea farm = store.area("farm").orElseThrow();
+        assertEquals("test", farm.source());
+        assertEquals(TESTER, farm.origin());
+    }
+
+    @Test
+    void addingChunksTheAreaHasChangesNothing() {
+        keeper.createArea(area("farm", A, B));
+        assertEquals(Keeper.AreaChange.Outcome.NOTHING_TO_CHANGE, keeper.addToArea("farm", List.of(A), 100).outcome());
+    }
+
+    @Test
+    void addingRespectsTheLimitForTheWholeArea() {
+        keeper.createArea(area("farm", A, B));
+        Keeper.AreaChange change = keeper.addToArea("farm", List.of(C), 2);
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.TOO_LARGE, 3, 0), change);
+        assertEquals(Set.of(A, B), store.area("farm").orElseThrow().chunks());
+        assertFalse(loader.forced.contains(C));
+    }
+
+    @Test
+    void addingToAnUnknownAreaFails() {
+        assertEquals(Keeper.AreaChange.Outcome.NO_SUCH_AREA, keeper.addToArea("farm", List.of(A), 100).outcome());
+        assertTrue(store.areas().isEmpty());
+    }
+
+    @Test
+    void removingFromAnAreaUnloadsOnlyChunksNothingElseKeeps() {
+        keeper.createArea(area("farm", A, B, C));
+        keeper.keep(List.of(B), TESTER);
+        Keeper.AreaChange change = keeper.removeFromArea("farm", List.of(A, B), () -> { });
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 2, 1), change, "B is still kept on its own");
+        assertEquals(Set.of(C), store.area("farm").orElseThrow().chunks());
+        assertEquals(Set.of(B, C), loader.forced);
+    }
+
+    @Test
+    void removingRunsTheBackupStepOnlyWhenSomethingChanges() {
+        keeper.createArea(area("farm", A, B));
+        List<String> steps = new ArrayList<>();
+        keeper.removeFromArea("farm", List.of(C), () -> steps.add("nothing"));
+        keeper.removeFromArea("farm", List.of(A, B), () -> steps.add("empty"));
+        keeper.removeFromArea("farm", List.of(A), () -> steps.add("changed"));
+        assertEquals(List.of("changed"), steps);
+    }
+
+    @Test
+    void removingEveryChunkIsRefused() {
+        keeper.createArea(area("farm", A, B));
+        Keeper.AreaChange change = keeper.removeFromArea("farm", List.of(A, B, C), () -> { });
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.WOULD_BE_EMPTY, 2, 0), change);
+        assertEquals(Set.of(A, B), store.area("farm").orElseThrow().chunks());
+        assertEquals(Set.of(A, B), loader.forced);
+    }
+
+    @Test
+    void removingChunksTheAreaDoesNotHaveChangesNothing() {
+        keeper.createArea(area("farm", A));
+        assertEquals(Keeper.AreaChange.Outcome.NOTHING_TO_CHANGE, keeper.removeFromArea("farm", List.of(B), () -> { }).outcome());
+        assertEquals(Keeper.AreaChange.Outcome.NO_SUCH_AREA, keeper.removeFromArea("other", List.of(A), () -> { }).outcome());
+    }
+
+    @Test
+    void changedAreasSurviveSavingAndLoading() {
+        keeper.createArea(area("farm", A, B));
+        keeper.addToArea("farm", List.of(C), 100);
+        keeper.removeFromArea("farm", List.of(A), () -> { });
+        ChunkStore reloaded = new ChunkStore(new File(folder.toFile(), "chunks.yml"), Logger.getAnonymousLogger());
+        reloaded.load();
+        assertEquals(Set.of(B, C), reloaded.area("farm").orElseThrow().chunks());
     }
 }

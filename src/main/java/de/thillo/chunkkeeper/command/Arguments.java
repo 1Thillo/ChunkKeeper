@@ -23,6 +23,19 @@ final class Arguments {
     static final String AREA_USAGE =
             "(coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world>)";
 
+    /**
+     * The most chunks a selection may have. {@code fromConfig} says whether this is max-area-chunks
+     * from config.yml, so the error message can point there.
+     */
+    record Limit(int chunks, boolean fromConfig) {
+
+        /**
+         * For {@code area remove}, which never loads a chunk: max-area-chunks would only get in the
+         * way there, so this is just a guard against building a gigantic list.
+         */
+        static final Limit REMOVE = new Limit(1_000_000, false);
+    }
+
     private Arguments() {
     }
 
@@ -75,16 +88,21 @@ final class Arguments {
      * areas larger than max-area-chunks from config.yml, so a typo cannot load millions of chunks.
      */
     static Optional<Area> area(ChunkKeeper plugin, CommandSender sender, String[] args, String command) {
-        Optional<Area> area = readArea(plugin, sender, args, command);
-        int limit = plugin.settings().maxAreaChunks();
-        if (area.isPresent() && area.get().chunks().size() > limit) {
+        return area(plugin, sender, args, command, new Limit(plugin.settings().maxAreaChunks(), true));
+    }
+
+    /** The same as {@link #area(ChunkKeeper, CommandSender, String[], String)}, with another limit. */
+    static Optional<Area> area(ChunkKeeper plugin, CommandSender sender, String[] args, String command, Limit limit) {
+        Optional<Area> area = readArea(plugin, sender, args, command, limit);
+        if (area.isPresent() && area.get().chunks().size() > limit.chunks()) {
             tooLarge(sender, area.get().chunks().size(), limit);
             return Optional.empty();
         }
         return area;
     }
 
-    private static Optional<Area> readArea(ChunkKeeper plugin, CommandSender sender, String[] args, String command) {
+    private static Optional<Area> readArea(ChunkKeeper plugin, CommandSender sender, String[] args, String command,
+            Limit limit) {
         String mode = args.length == 0 ? "" : args[0].toLowerCase();
         if (mode.equals("coords") && args.length == 6) {
             List<Integer> numbers = new ArrayList<>();
@@ -96,16 +114,16 @@ final class Arguments {
                 numbers.add(number.get());
             }
             long size = Area.rectangleSize(numbers.get(0), numbers.get(1), numbers.get(2), numbers.get(3));
-            if (size > plugin.settings().maxAreaChunks()) {
+            if (size > limit.chunks()) {
                 // checked before building the list, which could be huge
-                tooLarge(sender, size, plugin.settings().maxAreaChunks());
+                tooLarge(sender, size, limit);
                 return Optional.empty();
             }
             return world(sender, args[5]).map(world ->
                     Area.rectangle(world.getName(), numbers.get(0), numbers.get(1), numbers.get(2), numbers.get(3)));
         }
         if (mode.equals("radius") && (args.length == 2 || args.length == 5)) {
-            return radius(plugin, sender, args);
+            return radius(sender, args, limit);
         }
         if (mode.equals("worldedit") && args.length == 1) {
             Optional<Player> player = player(sender);
@@ -134,7 +152,7 @@ final class Arguments {
      * Reads {@code radius <r>} around the chunk the player stands in, or {@code radius <r> <x> <z> <world>}
      * around the given chunk.
      */
-    private static Optional<Area> radius(ChunkKeeper plugin, CommandSender sender, String[] args) {
+    private static Optional<Area> radius(CommandSender sender, String[] args, Limit limit) {
         Optional<Integer> radius = integer(sender, args[1]);
         if (radius.isEmpty()) {
             return Optional.empty();
@@ -143,10 +161,14 @@ final class Arguments {
             Messages.error(sender, "general.negative-radius");
             return Optional.empty();
         }
-        int limit = plugin.settings().maxAreaChunks();
-        int largest = Area.largestRadius(limit);
+        int largest = Area.largestRadius(limit.chunks());
         if (radius.get() > largest) {
-            Messages.error(sender, "general.radius-too-large", "radius", radius.get(), "limit", limit, "largest", largest);
+            if (limit.fromConfig()) {
+                Messages.error(sender, "general.radius-too-large", "radius", radius.get(), "limit", limit.chunks(), "largest", largest);
+            } else {
+                long side = 2L * radius.get() + 1;
+                tooLarge(sender, side * side, limit);
+            }
             return Optional.empty();
         }
         Optional<KeptChunk> center = args.length == 2
@@ -155,8 +177,9 @@ final class Arguments {
         return center.map(chunk -> Area.around(chunk.world(), chunk.x(), chunk.z(), radius.get()));
     }
 
-    private static void tooLarge(CommandSender sender, long size, int limit) {
-        Messages.error(sender, "general.area-too-large", "size", size, "limit", limit);
+    private static void tooLarge(CommandSender sender, long size, Limit limit) {
+        String key = limit.fromConfig() ? "general.area-too-large" : "general.selection-too-large";
+        Messages.error(sender, key, "size", size, "limit", limit.chunks());
     }
 
     /** Tab completion for the area modes. */

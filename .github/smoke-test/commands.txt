@@ -57,6 +57,15 @@ chk chunkinfo coords 10 10 world
 chk backup create
 chk backup list
 chk backup restore nope
+# Change the chunks of a named area (after "backup list": area remove makes a backup)
+chk keepregion coords 90 90 91 90 world --name grow
+chk area add grow coords 90 90 92 91 world
+chk area add grow coords 90 90 91 90 world
+chk area add grow coords 90 90 91 90 world_nether
+chk area remove grow coords 90 90 90 91 world
+chk area remove grow coords 95 95 95 95 world
+chk area remove grow coords 0 0 200 200 world
+chk area release grow
 # Take over a chunk from the vanilla /forceload command
 minecraft:forceload add 800 800
 wait 3
