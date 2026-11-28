@@ -90,3 +90,5 @@ chk releasechunk coords 50 50 world
 chk releaseall confirm
 chk list
 chk history
+# The test writes more than one page of history
+chk history 2
