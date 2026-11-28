@@ -20,11 +20,12 @@ import de.thillo.chunkkeeper.Text;
 /**
  * {@code area}: lists and manages named areas. They are created with {@code keepregion ... --name},
  * {@code keeprail ... --name} or {@code area convert}, which groups existing single chunks.
- * {@code area add} and {@code area remove} change the chunks of an area without releasing it.
+ * {@code area add} and {@code area remove} change the chunks of an area without releasing it,
+ * {@code area pause} and {@code area resume} stop and start keeping it loaded.
  */
 final class AreaCommand implements Subcommand {
 
-    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "add", "remove", "convert", "dissolve");
+    private static final List<String> ACTIONS = List.of("list", "info", "release", "rename", "add", "remove", "pause", "resume", "convert", "dissolve");
     private static final String CONVERT_USAGE =
             "convert <name> (coords <x1> <z1> <x2> <z2> <world> | radius <r> [<x> <z> <world>] | worldedit | worldguard <region> <world> | world <world>)";
 
@@ -44,7 +45,8 @@ final class AreaCommand implements Subcommand {
 
     @Override
     public String usage() {
-        return "(list | info <name> | release <name> | rename <name> <new name> | add <name> ... | remove <name> ... | " + CONVERT_USAGE + " | dissolve <name>)";
+        return "(list | info <name> | release <name> | rename <name> <new name> | add <name> ... | remove <name> ... | "
+                + "pause <name> | resume <name> | " + CONVERT_USAGE + " | dissolve <name>)";
     }
 
 
@@ -88,6 +90,20 @@ final class AreaCommand implements Subcommand {
                     Arguments.sendUsage(sender, name(), REMOVE_USAGE);
                 }
             }
+            case "pause" -> {
+                if (args.length == 2) {
+                    pause(sender, args[1].toLowerCase());
+                } else {
+                    Arguments.sendUsage(sender, name(), "pause <name>");
+                }
+            }
+            case "resume" -> {
+                if (args.length == 2) {
+                    resume(sender, args[1].toLowerCase());
+                } else {
+                    Arguments.sendUsage(sender, name(), "resume <name>");
+                }
+            }
             case "convert" -> {
                 if (args.length >= 3) {
                     convert(sender, args[1].toLowerCase(), Arrays.copyOfRange(args, 2, args.length));
@@ -114,8 +130,14 @@ final class AreaCommand implements Subcommand {
         }
         Messages.info(sender, "area.list-header", "count", areas.size());
         for (NamedArea area : areas) {
-            Messages.namedField(sender, area.name(), Text.of("area.list-entry", "count", area.chunks().size(), "world", area.world()));
+            Messages.namedField(sender, area.name(), listEntry(area));
         }
+    }
+
+    /** One line of {@code area list} and {@code list}, which says whether the area is paused. */
+    static Text listEntry(NamedArea area) {
+        String key = area.paused() ? "area.list-entry-paused" : "area.list-entry";
+        return Text.of(key, "count", area.chunks().size(), "world", area.world());
     }
 
     private void info(CommandSender sender, String areaName) {
@@ -126,6 +148,7 @@ final class AreaCommand implements Subcommand {
         NamedArea area = found.get();
         Messages.info(sender, "area.info-header", "name", area.name());
         Messages.field(sender, "area.label-world", area.world());
+        Messages.field(sender, "area.label-status", Text.of(area.paused() ? "area.status-paused" : "area.status-active"));
         Messages.field(sender, "area.label-chunks", area.chunks().size());
         if (!area.source().isEmpty()) {
             Messages.field(sender, "area.label-source", area.source());
@@ -150,8 +173,39 @@ final class AreaCommand implements Subcommand {
         int stillKept = area.chunks().size() - released.get().unloaded();
         Messages.success(sender, "area.released", "name", area.name(), "count", area.chunks().size());
         plugin.recordChange(sender, "history.area-released", "name", area.name(), "count", area.chunks().size());
-        if (stillKept > 0) {
+        // a paused area had nothing loaded, so there is nothing that "stays" loaded
+        if (stillKept > 0 && !area.paused()) {
             Messages.info(sender, "area.still-kept", "count", stillKept);
+        }
+    }
+
+    /** Stops keeping an area loaded without forgetting it. */
+    private void pause(CommandSender sender, String areaName) {
+        Keeper.AreaChange change = plugin.keeper().pauseArea(areaName);
+        switch (change.outcome()) {
+            case CHANGED -> {
+                Messages.success(sender, "area.paused", "name", areaName, "count", change.chunks());
+                plugin.recordChange(sender, "history.area-paused", "name", areaName, "count", change.chunks());
+                int stillKept = change.chunks() - change.loadChanged();
+                if (stillKept > 0) {
+                    Messages.info(sender, "area.still-kept", "count", stillKept);
+                }
+            }
+            case NOTHING_TO_CHANGE -> Messages.error(sender, "area.already-paused", "name", areaName);
+            default -> Messages.error(sender, "general.area-unknown", "name", areaName);
+        }
+    }
+
+    /** Keeps a paused area loaded again. */
+    private void resume(CommandSender sender, String areaName) {
+        Keeper.AreaChange change = plugin.keeper().resumeArea(areaName);
+        switch (change.outcome()) {
+            case CHANGED -> {
+                Messages.success(sender, "area.resumed", "name", areaName, "count", change.chunks(), "new", change.loadChanged());
+                plugin.recordChange(sender, "history.area-resumed", "name", areaName, "count", change.chunks());
+            }
+            case NOTHING_TO_CHANGE -> Messages.error(sender, "area.not-paused", "name", areaName);
+            default -> Messages.error(sender, "general.area-unknown", "name", areaName);
         }
     }
 
@@ -282,6 +336,10 @@ final class AreaCommand implements Subcommand {
 
     private void dissolve(CommandSender sender, String areaName) {
         Optional<NamedArea> area = plugin.store().area(areaName);
+        if (area.isPresent() && area.get().paused()) {
+            Messages.error(sender, "area.dissolve-paused", "name", areaName);
+            return;
+        }
         Optional<Integer> added = plugin.keeper().dissolveArea(areaName, Origin.now(sender.getName()));
         if (added.isEmpty() || area.isEmpty()) {
             Messages.error(sender, "general.area-unknown", "name", areaName);
@@ -326,6 +384,12 @@ final class AreaCommand implements Subcommand {
         }
         if (args.length >= 3 && (action.equals("add") || action.equals("remove"))) {
             return Arguments.areaSuggestions(plugin, sender, Arrays.copyOfRange(args, 2, args.length));
+        }
+        if (args.length == 2 && action.equals("pause")) {
+            return plugin.store().areas().stream().filter(area -> !area.paused()).map(NamedArea::name).toList();
+        }
+        if (args.length == 2 && action.equals("resume")) {
+            return plugin.store().areas().stream().filter(NamedArea::paused).map(NamedArea::name).toList();
         }
         if (args.length == 2 && !action.equals("list")) {
             return plugin.store().areas().stream().map(NamedArea::name).toList();

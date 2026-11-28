@@ -50,7 +50,8 @@ final class ChunkCommand implements Subcommand {
             }
         } else {
             boolean released = plugin.keeper().release(List.of(chunk.get())) > 0;
-            List<String> areas = plugin.store().areasContaining(chunk.get());
+            // only areas that are not paused keep the chunk loaded
+            List<String> areas = plugin.store().areasKeeping(chunk.get());
             if (released) {
                 Messages.success(sender, "chunk.released", "chunk", chunk.get().describe());
                 plugin.recordChange(sender, "history.released-chunk", "chunk", chunk.get().describe());
