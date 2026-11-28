@@ -1,0 +1,32 @@
+# After every merge into master, release-please reads the new commits (Conventional Commits) and
+# keeps a release pull request up to date: next version in version.txt and the new CHANGELOG
+# section. Merging that pull request creates the tag and the GitHub release, which starts
+# build.yml and attaches the jar.
+name: release-please
+
+on:
+  push:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # A token of the GitHub App instead of GITHUB_TOKEN: what GITHUB_TOKEN creates starts no other
+      # workflows, so the release pull request would get no checks and the release no jar.
+      - name: Get a token for the release app
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Update the release pull request or create the release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

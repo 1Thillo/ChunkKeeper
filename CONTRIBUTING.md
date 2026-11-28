@@ -31,6 +31,8 @@ lines in `.github/smoke-test/expected.txt` in the log.
 
 - **One topic per pull request**, split into small commits that each do one thing and build on
   their own. Commit messages and pull request descriptions are in English.
+- **Conventional Commits.** Every commit message starts with a type (see below). The changelog and
+  the next version are made from them.
 - **Paper and Folia.** ChunkKeeper runs on both. On Folia, force-load flags may only be changed on
   the global region thread and blocks only be read on the thread of their region; `ChunkLoader`
   has helpers for both. Changes to what is kept go through `Keeper`, whose methods are
@@ -47,10 +49,34 @@ lines in `.github/smoke-test/expected.txt` in the log.
   well; mark a file that is partly machine-translated at the top.
 - **Tests.** Logic that does not need a server (like `Keeper`, `ChunkStore`, `Area`) gets unit
   tests. New commands get a line in the smoke test where that is possible from the console.
-- **Changelog and docs.** Add a line to the "Unreleased" section of `CHANGELOG.md`, and update the
-  README when commands, permissions or options change.
+- **Docs.** Update the README when commands, permissions or options change. Do not edit
+  `CHANGELOG.md` or `version.txt`; release-please does that (see below).
 - **Existing data keeps working.** Servers update by replacing the jar, so older `chunks.yml` and
   `config.yml` files must still load. New config options need a default in `config.yml`.
+
+## Commit messages and releases
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Type | For | In the changelog |
+|---|---|---|
+| `feat:` | something new a server admin can use | "Added", next minor version |
+| `fix:` | a bug fixed | "Fixed", next patch version |
+| `perf:` | faster or lighter, same behaviour | "Changed" |
+| `docs:`, `test:`, `refactor:`, `build:`, `ci:`, `chore:`, `style:` | everything else | not listed |
+
+A change that breaks existing commands, data or config gets a `!` (`feat!: ...`) or a
+`BREAKING CHANGE:` line in the message body, and leads to the next major version.
+
+Write `feat:` and `fix:` subjects for server admins, because they end up in the changelog as they
+are: `feat: pause and resume named areas` rather than `feat: add pauseArea to Keeper`. Commits that
+only make sense together with others in the same pull request can use `refactor:` or `test:`, so
+only the commit that a server admin notices is listed.
+
+After every merge into `master`, [release-please](https://github.com/googleapis/release-please)
+updates a pull request called "chore(master): release ...". It holds the next version in
+`version.txt` and the new `CHANGELOG.md` section. Merging it creates the tag and the GitHub
+release, and GitHub Actions attaches the jar after the smoke test.
 
 ## Style
 
