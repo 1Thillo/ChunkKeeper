@@ -99,7 +99,7 @@ area:
   still-kept: "{count} seiner Chunks {count|bleibt|bleiben} geladen, weil {count|er|sie} einzeln oder von anderen Bereichen gehalten {count|wird|werden}."
   renamed: "Bereich „{old}“ in „{new}“ umbenannt."
   added: "{count} {count|Chunk|Chunks} aus {selection} zum Bereich „{name}“ hinzugefügt ({new} davon {new|wurde|wurden} vorher nicht gehalten)."
-  added-paused: "{count} {count|Chunk|Chunks} aus {selection} zum pausierten Bereich „{name}“ hinzugefügt. Sie werden geladen, sobald der Bereich fortgesetzt wird."
+  added-paused: "{count} {count|Chunk|Chunks} aus {selection} zum pausierten Bereich „{name}“ hinzugefügt. {count|Er wird|Sie werden} geladen, sobald der Bereich fortgesetzt wird."
   nothing-to-add: "Der Bereich „{name}“ hat schon alle Chunks in {selection}."
   removed: "{count} {count|Chunk|Chunks} in {selection} aus dem Bereich „{name}“ entfernt."
   nothing-to-remove: "Der Bereich „{name}“ hat keine Chunks in {selection}."

@@ -98,7 +98,7 @@ area:
   still-kept: "{count} of its chunks {count|stays|stay} loaded because {count|it is kept on its own|they are kept on their own} or by other areas."
   renamed: "Renamed area '{old}' to '{new}'."
   added: "Added {count} {count|chunk|chunks} from {selection} to area '{name}' ({new} of them {new|was|were} not kept before)."
-  added-paused: "Added {count} {count|chunk|chunks} from {selection} to the paused area '{name}'. They are loaded when the area is resumed."
+  added-paused: "Added {count} {count|chunk|chunks} from {selection} to the paused area '{name}'. {count|It is|They are} loaded when the area is resumed."
   nothing-to-add: "Area '{name}' already has every chunk in {selection}."
   removed: "Removed {count} {count|chunk|chunks} in {selection} from area '{name}'."
   nothing-to-remove: "Area '{name}' has no chunks in {selection}."
