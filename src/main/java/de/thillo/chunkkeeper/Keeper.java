@@ -14,7 +14,7 @@ import java.util.Set;
  * <p>Single chunks and named areas exist side by side. A chunk is force-loaded while anything keeps
  * it: itself, or at least one area. So releasing a single chunk leaves it loaded if an area still
  * contains it, and releasing an area leaves the chunks loaded that are kept on their own or by
- * another area.
+ * another area. A paused area keeps nothing loaded, but stays stored until it is resumed.
  *
  * <p>The methods are {@code synchronized}: on Folia two commands can run at the same time, and
  * "is this chunk still kept by something?" must not change halfway through.
@@ -88,7 +88,8 @@ public final class Keeper {
     }
 
     /**
-     * Removes a named area. Its chunks stay loaded where something else still keeps them.
+     * Removes a named area. Its chunks stay loaded where something else still keeps them. A paused
+     * area has nothing loaded, so releasing it unloads nothing.
      *
      * @return the removed area and how many of its chunks are no longer loaded, or empty if there is no such area
      */
@@ -97,7 +98,9 @@ public final class Keeper {
         if (area.isEmpty()) {
             return Optional.empty();
         }
-        List<KeptChunk> nowUnloaded = area.get().chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
+        List<KeptChunk> nowUnloaded = area.get().paused()
+                ? List.of()
+                : area.get().chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
         loader.release(nowUnloaded);
         store.save();
         return Optional.of(new AreaRelease(area.get(), nowUnloaded.size()));
@@ -135,13 +138,15 @@ public final class Keeper {
     }
 
     /**
-     * Removes a named area but keeps all its chunks, now on their own. Nothing is unloaded.
+     * Removes a named area but keeps all its chunks, now on their own. Nothing is unloaded. A paused
+     * area cannot be dissolved, because its chunks would suddenly be loaded; resume it first.
      *
-     * @return how many of its chunks were not kept on their own before, or empty if there is no such area
+     * @return how many of its chunks were not kept on their own before, or empty if there is no such
+     *         area or it is paused
      */
     public synchronized Optional<Integer> dissolveArea(String name, Origin origin) {
         Optional<NamedArea> area = store.area(name);
-        if (area.isEmpty()) {
+        if (area.isEmpty() || area.get().paused()) {
             return Optional.empty();
         }
         int added = 0;
@@ -176,8 +181,11 @@ public final class Keeper {
         if (result.size() > limit) {
             return new AreaChange(AreaChange.Outcome.TOO_LARGE, result.size(), 0);
         }
-        // look this up before the area changes, afterwards every new chunk counts as kept
-        List<KeptChunk> nowLoaded = newChunks.stream().filter(chunk -> !store.isKept(chunk)).toList();
+        // look this up before the area changes, afterwards every new chunk counts as kept;
+        // a paused area loads nothing
+        List<KeptChunk> nowLoaded = area.get().paused()
+                ? List.of()
+                : newChunks.stream().filter(chunk -> !store.isKept(chunk)).toList();
         store.removeArea(name);
         store.addArea(area.get().withChunks(result));
         loader.keepLoaded(nowLoaded);
@@ -211,11 +219,60 @@ public final class Keeper {
         beforeChange.run();
         store.removeArea(name);
         store.addArea(area.get().withChunks(result));
-        // look this up after the area changed, so the area itself no longer counts
-        List<KeptChunk> nowUnloaded = removed.stream().filter(chunk -> !store.isKept(chunk)).toList();
+        // look this up after the area changed, so the area itself no longer counts;
+        // a paused area had nothing loaded
+        List<KeptChunk> nowUnloaded = area.get().paused()
+                ? List.of()
+                : removed.stream().filter(chunk -> !store.isKept(chunk)).toList();
         loader.release(nowUnloaded);
         store.save();
         return new AreaChange(AreaChange.Outcome.CHANGED, removed.size(), nowUnloaded.size());
+    }
+
+    /**
+     * Pauses a named area: it stays stored, but its chunks are unloaded unless something else keeps them.
+     *
+     * @return what happened; NOTHING_TO_CHANGE means it was paused already, {@code loadChanged}
+     *         counts the chunks that are no longer loaded
+     */
+    public synchronized AreaChange pauseArea(String name) {
+        Optional<NamedArea> area = store.area(name);
+        if (area.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NO_SUCH_AREA, 0, 0);
+        }
+        if (area.get().paused()) {
+            return new AreaChange(AreaChange.Outcome.NOTHING_TO_CHANGE, area.get().chunks().size(), 0);
+        }
+        store.removeArea(name);
+        store.addArea(area.get().withPaused(true));
+        // look this up after pausing, so the area itself no longer counts
+        List<KeptChunk> nowUnloaded = area.get().chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
+        loader.release(nowUnloaded);
+        store.save();
+        return new AreaChange(AreaChange.Outcome.CHANGED, area.get().chunks().size(), nowUnloaded.size());
+    }
+
+    /**
+     * Resumes a paused area: its chunks are kept loaded again.
+     *
+     * @return what happened; NOTHING_TO_CHANGE means it was not paused, {@code loadChanged} counts
+     *         the chunks that were not kept by anything else
+     */
+    public synchronized AreaChange resumeArea(String name) {
+        Optional<NamedArea> area = store.area(name);
+        if (area.isEmpty()) {
+            return new AreaChange(AreaChange.Outcome.NO_SUCH_AREA, 0, 0);
+        }
+        if (!area.get().paused()) {
+            return new AreaChange(AreaChange.Outcome.NOTHING_TO_CHANGE, area.get().chunks().size(), 0);
+        }
+        // look this up while the area is still paused
+        List<KeptChunk> nowLoaded = area.get().chunks().stream().filter(chunk -> !store.isKept(chunk)).toList();
+        store.removeArea(name);
+        store.addArea(area.get().withPaused(false));
+        loader.keepLoaded(nowLoaded);
+        store.save();
+        return new AreaChange(AreaChange.Outcome.CHANGED, area.get().chunks().size(), nowLoaded.size());
     }
 
     /** @return false if the new name is taken or the old one does not exist */
@@ -253,10 +310,11 @@ public final class Keeper {
     }
 
     /**
-     * The result of {@link #addToArea} or {@link #removeFromArea}.
+     * The result of {@link #addToArea}, {@link #removeFromArea}, {@link #pauseArea} or {@link #resumeArea}.
      *
      * @param chunks      how many chunks were added or removed; for TOO_LARGE the size the area
-     *                    would have had, for WOULD_BE_EMPTY how many chunks would have been removed
+     *                    would have had, for WOULD_BE_EMPTY how many chunks would have been removed;
+     *                    for pause and resume the size of the area
      * @param loadChanged how many chunks were loaded or unloaded because of it
      */
     public record AreaChange(Outcome outcome, int chunks, int loadChanged) {
@@ -264,7 +322,10 @@ public final class Keeper {
         public enum Outcome {
             CHANGED,
             NO_SUCH_AREA,
-            /** add: the area has all these chunks already; remove: it has none of them */
+            /**
+             * add: the area has all these chunks already; remove: it has none of them; pause: it is
+             * paused already; resume: it is not paused
+             */
             NOTHING_TO_CHANGE,
             TOO_LARGE,
             WOULD_BE_EMPTY

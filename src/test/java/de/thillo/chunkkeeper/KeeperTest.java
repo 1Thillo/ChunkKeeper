@@ -257,6 +257,87 @@ class KeeperTest {
     }
 
     @Test
+    void pausingUnloadsOnlyChunksNothingElseKeeps() {
+        keeper.createArea(area("farm", A, B));
+        keeper.keep(List.of(B), TESTER);
+        Keeper.AreaChange change = keeper.pauseArea("farm");
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 2, 1), change, "B is kept on its own");
+        assertTrue(store.area("farm").orElseThrow().paused());
+        assertEquals(Set.of(B), loader.forced);
+        assertFalse(store.isKept(A));
+    }
+
+    @Test
+    void resumingLoadsTheChunksAgain() {
+        keeper.createArea(area("farm", A, B));
+        keeper.keep(List.of(B), TESTER);
+        keeper.pauseArea("farm");
+        Keeper.AreaChange change = keeper.resumeArea("farm");
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 2, 1), change, "B was still loaded");
+        assertFalse(store.area("farm").orElseThrow().paused());
+        assertEquals(Set.of(A, B), loader.forced);
+    }
+
+    @Test
+    void pausingTwiceOrResumingAnActiveAreaChangesNothing() {
+        keeper.createArea(area("farm", A));
+        assertEquals(Keeper.AreaChange.Outcome.NOTHING_TO_CHANGE, keeper.resumeArea("farm").outcome());
+        keeper.pauseArea("farm");
+        assertEquals(Keeper.AreaChange.Outcome.NOTHING_TO_CHANGE, keeper.pauseArea("farm").outcome());
+        assertEquals(Keeper.AreaChange.Outcome.NO_SUCH_AREA, keeper.pauseArea("other").outcome());
+        assertEquals(Keeper.AreaChange.Outcome.NO_SUCH_AREA, keeper.resumeArea("other").outcome());
+    }
+
+    @Test
+    void pausedAreaStaysPausedAfterSavingAndLoading() {
+        keeper.createArea(area("farm", A));
+        keeper.pauseArea("farm");
+        ChunkStore reloaded = new ChunkStore(new File(folder.toFile(), "chunks.yml"), Logger.getAnonymousLogger());
+        reloaded.load();
+        assertTrue(reloaded.area("farm").orElseThrow().paused());
+        assertTrue(reloaded.allKept().isEmpty());
+    }
+
+    @Test
+    void changingAPausedAreaLoadsAndUnloadsNothing() {
+        keeper.createArea(area("farm", A, B));
+        keeper.pauseArea("farm");
+        loader.forced.add(C);  // something else force-loads C, ChunkKeeper must not touch it
+        Keeper.AreaChange added = keeper.addToArea("farm", List.of(C), 100);
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 1, 0), added);
+        Keeper.AreaChange removed = keeper.removeFromArea("farm", List.of(A, C), () -> { });
+        assertEquals(new Keeper.AreaChange(Keeper.AreaChange.Outcome.CHANGED, 2, 0), removed);
+        assertEquals(Set.of(C), loader.forced);
+        assertTrue(store.area("farm").orElseThrow().paused());
+    }
+
+    @Test
+    void releasingAPausedAreaUnloadsNothing() {
+        keeper.createArea(area("farm", A));
+        keeper.pauseArea("farm");
+        loader.forced.add(A);  // something else force-loads A
+        assertEquals(0, keeper.releaseArea("farm").orElseThrow().unloaded());
+        assertEquals(Set.of(A), loader.forced);
+    }
+
+    @Test
+    void aPausedAreaCannotBeDissolved() {
+        keeper.createArea(area("farm", A));
+        keeper.pauseArea("farm");
+        assertTrue(keeper.dissolveArea("farm", TESTER).isEmpty());
+        assertTrue(store.area("farm").isPresent());
+        assertFalse(store.contains(A));
+    }
+
+    @Test
+    void renamingKeepsTheAreaPaused() {
+        keeper.createArea(area("farm", A));
+        keeper.pauseArea("farm");
+        keeper.renameArea("farm", "barn");
+        assertTrue(store.area("barn").orElseThrow().paused());
+    }
+
+    @Test
     void changedAreasSurviveSavingAndLoading() {
         keeper.createArea(area("farm", A, B));
         keeper.addToArea("farm", List.of(C), 100);
