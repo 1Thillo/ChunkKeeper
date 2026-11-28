@@ -95,7 +95,7 @@ area:
   label-created: "Created by"
   span: "({x1}, {z1}) to ({x2}, {z2})"
   released: "Released area '{name}' ({count} {count|chunk|chunks})."
-  still-kept: "{count} of its chunks {count|stays|stay} loaded because {count|it is|they are} kept on their own or by other areas."
+  still-kept: "{count} of its chunks {count|stays|stay} loaded because {count|it is kept on its own|they are kept on their own} or by other areas."
   renamed: "Renamed area '{old}' to '{new}'."
   added: "Added {count} {count|chunk|chunks} from {selection} to area '{name}' ({new} of them {new|was|were} not kept before)."
   added-paused: "Added {count} {count|chunk|chunks} from {selection} to the paused area '{name}'. They are loaded when the area is resumed."
