@@ -4,7 +4,8 @@ plugins {
 }
 
 group = "de.thillo.chunkkeeper"
-version = "1.6.0"
+// release-please writes the next version into version.txt in its release pull request
+version = file("version.txt").readText().trim()
 
 repositories {
     mavenCentral()
