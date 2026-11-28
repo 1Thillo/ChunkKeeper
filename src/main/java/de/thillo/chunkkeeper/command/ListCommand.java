@@ -72,7 +72,7 @@ final class ListCommand implements Subcommand {
         if (!areas.isEmpty()) {
             Messages.info(sender, "area.list-header", "count", areas.size());
             for (NamedArea area : areas) {
-                Messages.namedField(sender, area.name(), Text.of("area.list-entry", "count", area.chunks().size(), "world", area.world()));
+                Messages.namedField(sender, area.name(), AreaCommand.listEntry(area));
             }
         }
     }

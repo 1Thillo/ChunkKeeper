@@ -112,7 +112,9 @@ public final class ChunkStore {
             }
         }
         Origin origin = readOrigin(section.get("by"), section.get("at"));
-        areas.put(name, new NamedArea(name, world, areaChunks, section.getString("source", ""), origin));
+        // files from before 1.6.0 have no "paused", so their areas are not paused
+        boolean paused = section.getBoolean("paused", false);
+        areas.put(name, new NamedArea(name, world, areaChunks, section.getString("source", ""), origin, paused));
     }
 
     public synchronized void save() {
@@ -121,7 +123,7 @@ public final class ChunkStore {
                 "Chunks kept loaded by ChunkKeeper. Use the /chunkkeeper commands to change them,",
                 "or edit this file while the server is stopped.",
                 "chunks: single chunks as x,z,world (chunk coordinates), with who added them and when",
-                "areas:  named areas; their chunks are listed as x,z"));
+                "areas:  named areas; their chunks are listed as x,z, and 'paused: true' keeps none of them loaded"));
         yaml.set(CHUNKS, singleChunkEntries());
         for (NamedArea area : areas()) {
             String path = AREAS + "." + area.name();
@@ -130,6 +132,9 @@ public final class ChunkStore {
             if (area.origin().isKnown()) {
                 yaml.set(path + ".by", area.origin().by());
                 yaml.set(path + ".at", area.origin().at().get().toString());
+            }
+            if (area.paused()) {
+                yaml.set(path + ".paused", true);
             }
             yaml.set(path + "." + CHUNKS, sortedLines(area.chunks()));
         }
@@ -227,30 +232,38 @@ public final class ChunkStore {
         return Optional.ofNullable(areas.remove(name));
     }
 
+    /** The names of all areas with this chunk, paused ones included. */
     public List<String> areasContaining(KeptChunk chunk) {
         return areas().stream().filter(area -> area.contains(chunk)).map(NamedArea::name).toList();
     }
 
+    /** The names of the areas that keep this chunk loaded: those with the chunk that are not paused. */
+    public List<String> areasKeeping(KeptChunk chunk) {
+        return areas().stream().filter(area -> !area.paused() && area.contains(chunk)).map(NamedArea::name).toList();
+    }
+
     // --- everything together ---
 
-    /** True if the chunk is kept on its own or through at least one named area. */
+    /** True if the chunk is kept on its own or through at least one named area that is not paused. */
     public boolean isKept(KeptChunk chunk) {
         if (chunks.containsKey(chunk)) {
             return true;
         }
         for (NamedArea area : areas.values()) {
-            if (area.contains(chunk)) {
+            if (!area.paused() && area.contains(chunk)) {
                 return true;
             }
         }
         return false;
     }
 
-    /** Every chunk that has to be force-loaded: single chunks plus the chunks of all areas. */
+    /** Every chunk that has to be force-loaded: single chunks plus the chunks of all areas that are not paused. */
     public Set<KeptChunk> allKept() {
         Set<KeptChunk> result = new HashSet<>(chunks.keySet());
         for (NamedArea area : areas.values()) {
-            result.addAll(area.chunks());
+            if (!area.paused()) {
+                result.addAll(area.chunks());
+            }
         }
         return result;
     }
@@ -259,8 +272,9 @@ public final class ChunkStore {
         return allKept().stream().filter(chunk -> chunk.world().equals(world)).toList();
     }
 
+    /** True if anything keeps chunks loaded in this world. Paused areas do not count. */
     public boolean hasWorld(String world) {
         return chunks.keySet().stream().anyMatch(chunk -> chunk.world().equals(world))
-                || areas.values().stream().anyMatch(area -> area.world().equals(world));
+                || areas.values().stream().anyMatch(area -> !area.paused() && area.world().equals(world));
     }
 }

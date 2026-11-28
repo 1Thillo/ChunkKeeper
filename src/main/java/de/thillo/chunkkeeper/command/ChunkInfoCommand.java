@@ -72,7 +72,8 @@ final class ChunkInfoCommand implements Subcommand {
         boolean kept = plugin.store().isKept(chunk);
         boolean single = plugin.store().contains(chunk);
         Origin origin = plugin.store().origin(chunk).orElse(Origin.UNKNOWN);
-        List<String> areas = plugin.store().areasContaining(chunk);
+        List<String> areas = plugin.store().areasKeeping(chunk);
+        List<String> pausedAreas = plugin.store().areasContaining(chunk).stream().filter(name -> !areas.contains(name)).toList();
         World world = Bukkit.getWorld(chunk.world());
         // On Folia the force-load flags may only be read on the global region thread.
         plugin.loader().runGlobal(() -> {
@@ -86,6 +87,9 @@ final class ChunkInfoCommand implements Subcommand {
                 Messages.field(sender, "info.label-added", origin.describe());
             }
             Messages.field(sender, "info.label-areas", areas.isEmpty() ? Text.of("general.none") : String.join(", ", areas));
+            if (!pausedAreas.isEmpty()) {
+                Messages.field(sender, "info.label-paused-areas", String.join(", ", pausedAreas));
+            }
             Messages.yesNo(sender, "info.label-force-loaded", forceLoaded);
             Messages.yesNo(sender, "info.label-loaded", world.isChunkLoaded(chunk.x(), chunk.z()));
             if (kept != forceLoaded) {

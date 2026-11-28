@@ -60,11 +60,13 @@ which take the block position of a rail. `/chunkkeeper chunkinfo current` shows 
 | `area rename <name> <new name>` | Rename a named area |
 | `area add <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world>)` | Add the chunks of a selection to a named area |
 | `area remove <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world>)` | Remove the chunks of a selection from a named area |
+| `area pause <name>` | Stop keeping a named area loaded, but keep it stored |
+| `area resume <name>` | Keep a paused area loaded again |
 | `area convert <name> (coords ... \| radius ... \| worldedit \| worldguard <region> <world> \| world <world>)` | Turn the single chunks inside a selection into a named area |
 | `area dissolve <name>` | Turn a named area back into single chunks |
 | `releaseall confirm` | Release every chunk and every named area (console only by default) |
 | `chunkinfo current \| coords ...` | Whether a chunk is kept, force-loaded and loaded right now; with an area: how many of its chunks are kept |
-| `show [<radius> \| off]` | Draw the outline of the kept chunks around you with particles for 30 seconds (yellow: single chunks, magenta: named areas) |
+| `show [<radius> \| off]` | Draw the outline of the kept chunks around you with particles for 30 seconds (yellow: single chunks, magenta: named areas, grey: paused areas) |
 | `list [<world> [page]]` | Kept chunks per world and the named areas, or the single chunks of one world |
 | `import [keepchunks]` | Add the chunks from KeepChunks' `data.yml` again |
 | `import forceload [<world>]` | Take over the chunks force-loaded with the vanilla `/forceload` command |
@@ -102,6 +104,13 @@ The selection has to be in the area's world, and for `area add` the limit `max-a
 the whole area afterwards. `area remove` never loads a chunk, so it also takes larger selections. An
 area cannot lose its last chunk this way (use `area release` for that). Removed chunks stay
 loaded if they are kept on their own or by another area.
+
+An area that is only needed now and then can be paused instead of released: `area pause halloween`
+after the season, `area resume halloween` next year. A paused area keeps its chunks, name and origin,
+but keeps nothing loaded; chunks that are also kept on their own or by another area stay loaded.
+`area list`, `area info` and `chunkinfo` say which areas are paused, and `show` draws them in grey.
+Paused areas can be renamed, changed with `area add` and `area remove` (which then load or unload
+nothing) and released, but not dissolved: resume them first.
 
 Names may use lower-case letters, digits, `-` and `_` (up to 32 characters).
 

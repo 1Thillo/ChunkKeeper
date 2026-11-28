@@ -12,6 +12,10 @@ All notable changes to ChunkKeeper are listed here. The format follows
   world. For `area add`, `max-area-chunks` applies to the result; `area remove` also takes larger
   selections, because it never loads a chunk. Only removed chunks that nothing else keeps are
   unloaded, and `area remove` makes a backup first.
+- `area pause <name>` and `area resume <name>`: a paused area stays stored with its chunks, name and origin,
+  but keeps nothing loaded. `area list`, `list`, `area info` and `chunkinfo` show paused areas as such, and
+  `show` draws them in grey. `chunks.yml` gets `paused: true` per paused area; older files keep working.
+  An older version of ChunkKeeper does not know the flag and would keep paused areas loaded again.
 
 ## [1.5.0] - 2026-11-04
 

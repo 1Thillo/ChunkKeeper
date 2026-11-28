@@ -38,6 +38,8 @@ public final class BorderView {
     // Yellow and magenta stand out against grass, water, sky and stone; green and blue did not.
     private static final Particle.DustOptions SINGLE = new Particle.DustOptions(Color.fromRGB(0xFF, 0xE0, 0x10), 2.0f);
     private static final Particle.DustOptions AREA = new Particle.DustOptions(Color.fromRGB(0xFF, 0x30, 0xF0), 2.0f);
+    // Paused areas keep nothing loaded, so they get a plain light grey that does not look "active".
+    private static final Particle.DustOptions PAUSED = new Particle.DustOptions(Color.fromRGB(0xC8, 0xC8, 0xC8), 2.0f);
 
     private final ChunkKeeper plugin;
     private final Map<UUID, ScheduledTask> running = new ConcurrentHashMap<>();
@@ -109,8 +111,9 @@ public final class BorderView {
         }
         for (NamedArea area : plugin.store().areas()) {
             if (area.world().equals(world)) {
+                Particle.DustOptions colour = area.paused() ? PAUSED : AREA;
                 for (ChunkBorders.Edge edge : ChunkBorders.of(area.chunks())) {
-                    lines.add(new Line(edge, AREA));
+                    lines.add(new Line(edge, colour));
                 }
             }
         }

@@ -66,6 +66,18 @@ chk area remove grow coords 90 90 90 91 world
 chk area remove grow coords 95 95 95 95 world
 chk area remove grow coords 0 0 200 200 world
 chk area release grow
+# Pause and resume a named area; one of its chunks is also kept on its own
+chk keepregion coords 95 95 96 95 world --name sleepy
+chk keepchunk coords 96 95 world
+chk area pause sleepy
+chk area pause sleepy
+chk chunkinfo coords 95 95 world
+chk area list
+chk area dissolve sleepy
+chk area resume sleepy
+chk area resume sleepy
+chk area release sleepy
+chk releasechunk coords 96 95 world
 # Take over a chunk from the vanilla /forceload command
 minecraft:forceload add 800 800
 wait 3
@@ -78,3 +90,5 @@ chk releasechunk coords 50 50 world
 chk releaseall confirm
 chk list
 chk history
+# The test writes more than one page of history
+chk history 2
