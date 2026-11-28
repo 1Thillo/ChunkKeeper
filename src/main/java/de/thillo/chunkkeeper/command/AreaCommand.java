@@ -237,8 +237,13 @@ final class AreaCommand implements Subcommand {
         Keeper.AreaChange change = plugin.keeper().addToArea(areaName, selection.get().chunks(), limit);
         switch (change.outcome()) {
             case CHANGED -> {
-                Messages.success(sender, "area.added", "count", change.chunks(), "selection", where, "name", areaName,
-                        "new", change.loadChanged());
+                boolean paused = plugin.store().area(areaName).map(NamedArea::paused).orElse(false);
+                if (paused) {
+                    Messages.success(sender, "area.added-paused", "count", change.chunks(), "selection", where, "name", areaName);
+                } else {
+                    Messages.success(sender, "area.added", "count", change.chunks(), "selection", where, "name", areaName,
+                            "new", change.loadChanged());
+                }
                 plugin.recordChange(sender, "history.area-added", "count", change.chunks(), "name", areaName, "selection", where);
             }
             case NOTHING_TO_CHANGE -> Messages.error(sender, "area.nothing-to-add", "name", areaName, "selection", where);

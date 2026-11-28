@@ -98,6 +98,7 @@ area:
   still-kept: "{count} of its chunks {count|stays|stay} loaded because {count|it is|they are} kept on their own or by other areas."
   renamed: "Renamed area '{old}' to '{new}'."
   added: "Added {count} {count|chunk|chunks} from {selection} to area '{name}' ({new} of them {new|was|were} not kept before)."
+  added-paused: "Added {count} {count|chunk|chunks} from {selection} to the paused area '{name}'. They are loaded when the area is resumed."
   nothing-to-add: "Area '{name}' already has every chunk in {selection}."
   removed: "Removed {count} {count|chunk|chunks} in {selection} from area '{name}'."
   nothing-to-remove: "Area '{name}' has no chunks in {selection}."
@@ -154,6 +155,7 @@ releaseall:
 
 reload:
   done: "Reloaded. {chunks} single {chunks|chunk|chunks} and {areas} named {areas|area|areas} are kept loaded."
+  paused-areas: "{count} more named {count|area is|areas are} paused."
 
 import:
   no-file: "There is no {file} to import from."

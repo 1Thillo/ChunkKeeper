@@ -4,6 +4,7 @@ import org.bukkit.command.CommandSender;
 
 import de.thillo.chunkkeeper.ChunkKeeper;
 import de.thillo.chunkkeeper.Messages;
+import de.thillo.chunkkeeper.NamedArea;
 
 /** {@code reload}: reads config.yml and chunks.yml again, for example after editing them by hand. */
 final class ReloadCommand implements Subcommand {
@@ -28,6 +29,11 @@ final class ReloadCommand implements Subcommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         plugin.reload();
-        Messages.success(sender, "reload.done", "chunks", plugin.store().size(), "areas", plugin.store().areas().size());
+        long paused = plugin.store().areas().stream().filter(NamedArea::paused).count();
+        long active = plugin.store().areas().size() - paused;
+        Messages.success(sender, "reload.done", "chunks", plugin.store().size(), "areas", active);
+        if (paused > 0) {
+            Messages.info(sender, "reload.paused-areas", "count", paused);
+        }
     }
 }
