@@ -6,6 +6,8 @@ All notable changes to ChunkKeeper are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-28
+
 ### Added
 - `area add <name> <selection>` and `area remove <name> <selection>` change the chunks of a named area
   without releasing it, with the same selections as `keepregion`. The selection has to be in the area's
@@ -122,7 +124,8 @@ First release, a replacement for the discontinued KeepChunks plugin with Folia s
 - Safety limits `max-area-chunks` and `rail-search-limit`.
 - Paper and Folia 26.2 support.
 
-[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.2.0...v1.3.0
