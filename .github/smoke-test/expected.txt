@@ -54,6 +54,16 @@ Area 'grow' has no chunks in
 That would remove every chunk of area 'grow'
 Released area 'grow' (4 chunks).
 | CONSOLE | added 4 chunks to area 'grow'
+Paused area 'sleepy' (2 chunks).
+1 of its chunks stays loaded
+Area 'sleepy' is paused already.
+Paused areas: sleepy
+sleepy: 2 chunks in 'world', paused
+Area 'sleepy' is paused, so its chunks would suddenly be loaded.
+Resumed area 'sleepy' (2 chunks, 1 of them was not kept by anything else).
+Area 'sleepy' is not paused.
+Released area 'sleepy' (2 chunks).
+| CONSOLE | paused area 'sleepy' (2 chunks)
 Took over 1 chunk force-loaded with /forceload; ChunkKeeper keeps it on its own now
 ChunkKeeper already keeps every force-loaded chunk (
 repaired: 7 (
