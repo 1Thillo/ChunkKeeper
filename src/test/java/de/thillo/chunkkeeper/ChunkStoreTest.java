@@ -179,6 +179,59 @@ class ChunkStoreTest {
     }
 
     @Test
+    void pausedAreasComeBackPaused() {
+        ChunkStore store = newStore();
+        NamedArea paused = new NamedArea("halloween", "w", Set.of(new KeptChunk("w", 0, 0)), "", Origin.UNKNOWN, true);
+        NamedArea active = new NamedArea("farm", "w", Set.of(new KeptChunk("w", 5, 5)), "", Origin.UNKNOWN);
+        store.addArea(paused);
+        store.addArea(active);
+        store.save();
+
+        ChunkStore reloaded = newStore();
+        reloaded.load();
+        assertEquals(Optional.of(paused), reloaded.area("halloween"));
+        assertEquals(Optional.of(active), reloaded.area("farm"));
+    }
+
+    @Test
+    void areasWithoutPausedFlagAreNotPaused() throws IOException {
+        Files.writeString(folder.resolve("chunks.yml"), "areas:\n  farm:\n    world: w\n    chunks:\n    - 1,1\n");
+        ChunkStore store = newStore();
+        store.load();
+        assertFalse(store.area("farm").orElseThrow().paused());
+    }
+
+    @Test
+    void pausedAreasKeepNothing() {
+        ChunkStore store = newStore();
+        KeptChunk single = new KeptChunk("w", 1, 1);
+        KeptChunk onlyPaused = new KeptChunk("w", 5, 5);
+        store.add(single, Origin.UNKNOWN);
+        store.addArea(new NamedArea("halloween", "w", Set.of(single, onlyPaused), "", Origin.UNKNOWN, true));
+
+        assertTrue(store.isKept(single));
+        assertFalse(store.isKept(onlyPaused));
+        assertEquals(Set.of(single), store.allKept());
+        assertEquals(List.of("halloween"), store.areasContaining(onlyPaused));
+        assertEquals(List.of(), store.areasKeeping(onlyPaused));
+    }
+
+    @Test
+    void worldWithOnlyAPausedAreaDoesNotCount() {
+        ChunkStore store = newStore();
+        store.addArea(new NamedArea("farm", "nether", Set.of(new KeptChunk("nether", 0, 0)), "", Origin.UNKNOWN, true));
+        assertFalse(store.hasWorld("nether"));
+    }
+
+    @Test
+    void renamingAndChangingChunksKeepThePause() {
+        NamedArea paused = new NamedArea("a", "w", Set.of(new KeptChunk("w", 0, 0)), "", Origin.UNKNOWN, true);
+        assertTrue(paused.renamed("b").paused());
+        assertTrue(paused.withChunks(Set.of(new KeptChunk("w", 1, 1))).paused());
+        assertFalse(paused.withPaused(false).paused());
+    }
+
+    @Test
     void knowsWhetherTheFileExists() {
         ChunkStore store = newStore();
         assertFalse(store.fileExists());
