@@ -1,10 +1,12 @@
 # Changelog
 
-All notable changes to ChunkKeeper are listed here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+All notable changes to ChunkKeeper are listed here. Versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+Entries after 1.6.0 are written by [release-please](https://github.com/googleapis/release-please)
+from the [Conventional Commits](https://www.conventionalcommits.org/) since the last release
+(`feat:` under "Added", `fix:` under "Fixed"). The entries up to 1.6.0 follow
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.6.0] - 2026-11-28
 
@@ -124,7 +126,6 @@ First release, a replacement for the discontinued KeepChunks plugin with Folia s
 - Safety limits `max-area-chunks` and `rail-search-limit`.
 - Paper and Folia 26.2 support.
 
-[Unreleased]: https://github.com/1Thillo/ChunkKeeper/compare/v1.6.0...HEAD
 [1.6.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/1Thillo/ChunkKeeper/compare/v1.3.0...v1.4.0
